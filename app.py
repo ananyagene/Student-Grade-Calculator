@@ -44,8 +44,8 @@ def index():
         elif not names:
             error = "At least one subject is required."
         else:
-            parsed_marks = []
-            # Step 3: Validate each subject row
+            parsed_subjects = []
+            # Step 3: Validate each subject row and calculate individual subject grade
             for n, m in zip(names, marks_raw):
                 name_clean = n.strip()
                 mark_clean = m.strip()
@@ -63,25 +63,34 @@ def index():
                     if not (0 <= mark_val <= 100):
                         error = f"Marks for '{name_clean}' must be between 0 and 100."
                         break
-                    parsed_marks.append(mark_val)
+                    
+                    # Individual grade for this subject
+                    subject_grade = calculate_grade(mark_val)
+
+                    parsed_subjects.append({
+                        'name': name_clean,
+                        'marks': int(mark_val) if mark_val.is_integer() else round(mark_val, 2),
+                        'grade': subject_grade
+                    })
                 except ValueError:
                     error = f"Please enter valid numeric marks for '{name_clean}'."
                     break
 
-            # Step 4: If all validations pass, calculate results
+            # Step 4: If all validations pass, calculate overall results
             if not error:
-                num_subjects = len(parsed_marks)
-                total = sum(parsed_marks)
+                num_subjects = len(parsed_subjects)
+                total = sum(s['marks'] for s in parsed_subjects)
                 max_marks = num_subjects * 100
                 percentage = (total / max_marks) * 100
-                grade = calculate_grade(percentage)
+                overall_grade = calculate_grade(percentage)
 
                 result = {
                     'student_name': student_name,
+                    'subjects': parsed_subjects,
                     'total': int(total) if total.is_integer() else round(total, 2),
                     'max_marks': max_marks,
                     'percentage': f"{percentage:.2f}%",
-                    'grade': grade
+                    'grade': overall_grade
                 }
 
     return render_template('index.html', result=result, error=error, subjects=subjects)

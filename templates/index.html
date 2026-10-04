@@ -71,9 +71,33 @@
             <div class="result-box">
                 <h3>Calculation Result</h3>
                 <p><strong>Student:</strong> {{ result.student_name }}</p>
-                <p><strong>Total:</strong> {{ result.total }} / {{ result.max_marks }}</p>
-                <p><strong>Percentage:</strong> {{ result.percentage }}</p>
-                <p><strong>Grade:</strong> <span class="grade-badge">{{ result.grade }}</span></p>
+
+                <!-- Table for Individual Subject Grades -->
+                <table class="grades-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Marks</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in result.subjects %}
+                            <tr>
+                                <td>{{ sub.name }}</td>
+                                <td>{{ sub.marks }}</td>
+                                <td><span class="grade-badge">{{ sub.grade }}</span></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Overall Summary -->
+                <div class="overall-summary">
+                    <p><strong>Total:</strong> {{ result.total }} / {{ result.max_marks }}</p>
+                    <p><strong>Percentage:</strong> {{ result.percentage }}</p>
+                    <p><strong>Overall Grade:</strong> <span class="grade-badge">{{ result.grade }}</span></p>
+                </div>
             </div>
         {% endif %}
     </div>
