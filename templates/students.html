@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}All Students Records - Result Management System{% endblock %}
+
+{% block content %}
+<div class="full-page-container">
+    <div class="page-header">
+        <div>
+            <h2>Student Result Records</h2>
+            <p class="subtitle">Search, filter, sort, and download individual result cards.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('export_csv') }}" class="btn-secondary">📥 Export All to CSV</a>
+            <a href="{{ url_for('index') }}" class="btn-primary">➕ Add New Student</a>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <form method="GET" action="{{ url_for('student_list') }}" class="filter-toolbar">
+        <div class="filter-group">
+            <label for="q">Search</label>
+            <input 
+                type="text" 
+                id="q" 
+                name="q" 
+                placeholder="Search name or roll..." 
+                value="{{ q }}"
+            >
+        </div>
+
+        <div class="filter-group">
+            <label for="status">Status</label>
+            <select id="status" name="status" onchange="this.form.submit()">
+                <option value="">All Statuses</option>
+                <option value="PASS" {% if status_filter == 'PASS' %}selected{% endif %}>PASS</option>
+                <option value="FAIL" {% if status_filter == 'FAIL' %}selected{% endif %}>FAIL</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="grade">Grade</label>
+            <select id="grade" name="grade" onchange="this.form.submit()">
+                <option value="">All Grades</option>
+                <option value="A" {% if grade_filter == 'A' %}selected{% endif %}>Grade A</option>
+                <option value="B" {% if grade_filter == 'B' %}selected{% endif %}>Grade B</option>
+                <option value="C" {% if grade_filter == 'C' %}selected{% endif %}>Grade C</option>
+                <option value="D" {% if grade_filter == 'D' %}selected{% endif %}>Grade D</option>
+                <option value="F" {% if grade_filter == 'F' %}selected{% endif %}>Grade F</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="sort_by">Sort By</label>
+            <select id="sort_by" name="sort_by" onchange="this.form.submit()">
+                <option value="percentage_desc" {% if sort_by == 'percentage_desc' %}selected{% endif %}>Percentage: High to Low</option>
+                <option value="percentage_asc" {% if sort_by == 'percentage_asc' %}selected{% endif %}>Percentage: Low to High</option>
+                <option value="name_asc" {% if sort_by == 'name_asc' %}selected{% endif %}>Name: A to Z</option>
+                <option value="name_desc" {% if sort_by == 'name_desc' %}selected{% endif %}>Name: Z to A</option>
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn-search">Apply</button>
+            <a href="{{ url_for('student_list') }}" class="btn-reset">Reset</a>
+        </div>
+    </form>
+
+    <!-- Students Table -->
+    {% if students and students|length > 0 %}
+        <div class="table-card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Roll No.</th>
+                        <th>Student Name</th>
+                        <th>Course / Class</th>
+                        <th>Sem</th>
+                        <th>Total</th>
+                        <th>Percentage</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in students %}
+                        <tr>
+                            <td><b>{{ s.roll_number }}</b></td>
+                            <td>{{ s.student_name }}</td>
+                            <td>{{ s.course }}</td>
+                            <td>{{ s.semester }}</td>
+                            <td>{{ s.total }} / {{ s.max_marks }}</td>
+                            <td><b>{{ s.percentage_formatted }}</b></td>
+                            <td><span class="grade-badge">{{ s.grade }}</span></td>
+                            <td>
+                                <span class="status-badge {{ 'status-pass' if s.status == 'PASS' else 'status-fail' }}">
+                                    {{ s.status }}
+                                </span>
+                            </td>
+                            <td class="action-cell">
+                                <a href="{{ url_for('student_detail', student_id=s.id) }}" class="btn-action-view" title="View Result">👁️ View</a>
+                                <a href="{{ url_for('export_pdf', student_id=s.id) }}" class="btn-action-pdf" title="Download PDF">📄 PDF</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📂</div>
+            <h3>No Student Records Found</h3>
+            <p>No student results matched your search/filter criteria, or no students have been added yet.</p>
+            <a href="{{ url_for('index') }}" class="btn-primary">➕ Add First Student</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,78 +1,165 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Grade Calculator</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-    <div class="calculator-container">
-        <h2>Student Grade Calculator</h2>
+{% block title %}Calculate & Add Student - Result Management System{% endblock %}
 
-        <!-- Show error message if validation fails -->
-        {% if error %}
-            <div class="error-box">
-                {{ error }}
-            </div>
-        {% endif %}
+{% block content %}
+<div class="calculator-container">
+    <h2>Student Result Calculator & Entry</h2>
+    <p class="subtitle">Enter student information and marks to calculate grades and store records.</p>
 
-        <!-- Grade Input Form -->
-        <form method="POST" action="/">
+    <!-- Error Banner -->
+    {% if error %}
+        <div class="error-box">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <!-- Input Form -->
+    <form method="POST" action="/" class="entry-form">
+        <div class="section-title">Student Information</div>
+        <div class="form-grid">
             <div class="form-group">
-                <label for="student_name">Student Name:</label>
+                <label for="student_name">Student Name *</label>
                 <input 
                     type="text" 
                     id="student_name" 
                     name="student_name" 
-                    placeholder="Enter student name"
-                    value="{{ request.form.get('student_name', '') }}"
+                    placeholder="e.g. Ananya"
+                    value="{{ student.name }}"
                     required
                 >
             </div>
 
-            <label>Subjects & Marks:</label>
-            <!-- Dynamic Subjects Container (Starts with 3 rows by default) -->
-            <div id="subjects-container">
-                {% for sub in subjects %}
-                    <div class="subject-row">
-                        <input 
-                            type="text" 
-                            name="subject_name" 
-                            placeholder="Subject name" 
-                            value="{{ sub.name }}" 
-                            required
-                        >
-                        <input 
-                            type="number" 
-                            name="subject_marks" 
-                            min="0" 
-                            max="100" 
-                            step="any" 
-                            placeholder="Marks (0-100)" 
-                            value="{{ sub.marks }}" 
-                            required
-                        >
-                        <button type="button" class="btn-remove" onclick="removeSubject(this)">Remove</button>
-                    </div>
-                {% endfor %}
+            <div class="form-group">
+                <label for="roll_number">Roll Number *</label>
+                <input 
+                    type="text" 
+                    id="roll_number" 
+                    name="roll_number" 
+                    placeholder="e.g. 101"
+                    value="{{ student.roll_number }}"
+                    required
+                >
             </div>
 
-            <!-- Add Subject Button -->
-            <button type="button" class="btn-add" onclick="addSubject()">+ Add Subject</button>
+            <div class="form-group">
+                <label for="course">Course / Class *</label>
+                <input 
+                    type="text" 
+                    id="course" 
+                    name="course" 
+                    placeholder="e.g. MCA AI"
+                    value="{{ student.course }}"
+                    required
+                >
+            </div>
 
-            <!-- Calculate Grade Submit Button -->
-            <button type="submit" class="btn-calculate">Calculate Grade</button>
-        </form>
+            <div class="form-group">
+                <label for="semester">Semester *</label>
+                <input 
+                    type="text" 
+                    id="semester" 
+                    name="semester" 
+                    placeholder="e.g. 1"
+                    value="{{ student.semester }}"
+                    required
+                >
+            </div>
 
-        <!-- Display Results on the same page -->
-        {% if result %}
-            <div class="result-box">
-                <h3>Calculation Result</h3>
-                <p><strong>Student:</strong> {{ result.student_name }}</p>
+            <div class="form-group full-width">
+                <label for="academic_year">Academic Year *</label>
+                <input 
+                    type="text" 
+                    id="academic_year" 
+                    name="academic_year" 
+                    placeholder="e.g. 2026–27"
+                    value="{{ student.academic_year }}"
+                    required
+                >
+            </div>
+        </div>
 
-                <!-- Table for Individual Subject Grades -->
+        <div class="section-title">Subject-Wise Marks (out of 100)</div>
+        <div id="subjects-container">
+            {% for sub in subjects %}
+                <div class="subject-row">
+                    <input 
+                        type="text" 
+                        name="subject_name" 
+                        placeholder="Subject Name" 
+                        value="{{ sub.name }}" 
+                        required
+                    >
+                    <input 
+                        type="number" 
+                        name="subject_marks" 
+                        min="0" 
+                        max="100" 
+                        step="any" 
+                        placeholder="Marks (0-100)" 
+                        value="{{ sub.marks }}" 
+                        required
+                    >
+                    <button type="button" class="btn-remove" onclick="removeSubject(this)">Remove</button>
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" class="btn-add" onclick="addSubject()">+ Add Subject</button>
+        <button type="submit" class="btn-calculate">Calculate & Save Result</button>
+    </form>
+
+    <!-- Result Display Section -->
+    {% if result %}
+        <div class="result-section">
+            
+            <!-- Result Summary Card -->
+            <div class="result-summary-card">
+                <div class="summary-header">
+                    <h3>RESULT SUMMARY</h3>
+                    <span class="status-badge {{ 'status-pass' if result.status == 'PASS' else 'status-fail' }}">
+                        {{ result.status }}
+                    </span>
+                </div>
+                
+                <div class="summary-meta-grid">
+                    <div><strong>Student:</strong> {{ result.student_name }}</div>
+                    <div><strong>Roll Number:</strong> {{ result.roll_number }}</div>
+                    <div><strong>Course:</strong> {{ result.course }}</div>
+                    <div><strong>Semester:</strong> {{ result.semester }}</div>
+                    <div><strong>Academic Year:</strong> {{ result.academic_year }}</div>
+                    <div><strong>Total Subjects:</strong> {{ result.total_subjects }}</div>
+                    <div><strong>Total Marks:</strong> {{ result.total }} / {{ result.max_marks }}</div>
+                    <div><strong>Percentage:</strong> {{ result.percentage_formatted }}</div>
+                    <div><strong>Overall Grade:</strong> <span class="grade-badge">{{ result.grade }}</span></div>
+                    <div><strong>Overall Status:</strong> <b>{{ result.status }}</b></div>
+                </div>
+
+                <div class="performance-message-box">
+                    <strong>Feedback:</strong> {{ result.performance_message }}
+                </div>
+
+                {% if result.failed_count > 0 %}
+                    <div class="fail-safe-box warning">
+                        ⚠️ {{ result.fail_safe_message }}
+                    </div>
+                {% else %}
+                    <div class="fail-safe-box success">
+                        ✅ {{ result.fail_safe_message }}
+                    </div>
+                {% endif %}
+
+                {% if result.id %}
+                    <div class="action-buttons-group">
+                        <a href="{{ url_for('export_pdf', student_id=result.id) }}" class="btn-export-pdf">📄 Download Official PDF Report</a>
+                        <a href="{{ url_for('student_list') }}" class="btn-view-all">📋 View in All Students List</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Subject-Wise Table -->
+            <div class="card-box">
+                <h4>Subject Results</h4>
                 <table class="grades-table">
                     <thead>
                         <tr>
@@ -86,7 +173,7 @@
                     <tbody>
                         {% for sub in result.subjects %}
                             <tr>
-                                <td>{{ sub.name }}</td>
+                                <td><b>{{ sub.name }}</b></td>
                                 <td>{{ sub.marks }}</td>
                                 <td><span class="grade-badge">{{ sub.grade }}</span></td>
                                 <td>
@@ -99,71 +186,145 @@
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
 
-                <!-- Overall Summary -->
-                <div class="overall-summary">
-                    <p><strong>Total:</strong> {{ result.total }} / {{ result.max_marks }}</p>
-                    <p><strong>Percentage:</strong> {{ result.percentage }}</p>
-                    <p><strong>Overall Grade:</strong> <span class="grade-badge">{{ result.grade }}</span></p>
-                    <p><strong>Overall Status:</strong> 
-                        <span class="status-badge {{ 'status-pass' if result.status == 'PASS' else 'status-fail' }}">
-                            {{ result.status }}
+            <!-- Analytical Breakdown Cards -->
+            <div class="card-box">
+                <h4>Performance Analytics</h4>
+                <div class="analytics-grid">
+                    <div class="metric-card">
+                        <span class="metric-label">Average Marks</span>
+                        <span class="metric-value">{{ result.average_marks }} / 100</span>
+                    </div>
+
+                    <div class="metric-card">
+                        <span class="metric-label">Passed Subjects</span>
+                        <span class="metric-value">{{ result.passed_count }} / {{ result.total_subjects }}</span>
+                    </div>
+
+                    <div class="metric-card">
+                        <span class="metric-label">Failed Subjects</span>
+                        <span class="metric-value">{{ result.failed_count }} / {{ result.total_subjects }}</span>
+                    </div>
+
+                    <div class="metric-card">
+                        <span class="metric-label">Pass Percentage</span>
+                        <span class="metric-value">{{ result.pass_percentage }}%</span>
+                    </div>
+
+                    <div class="metric-card">
+                        <span class="metric-label">Highest Scoring Subject</span>
+                        <span class="metric-value">
+                            {% for s in result.highest_subjects %}
+                                {{ s.name }} ({{ s.marks }}){% if not loop.last %}, {% endif %}
+                            {% endfor %}
                         </span>
-                    </p>
+                    </div>
+
+                    <div class="metric-card">
+                        <span class="metric-label">Lowest Scoring Subject</span>
+                        <span class="metric-value">
+                            {% for s in result.lowest_subjects %}
+                                {{ s.name }} ({{ s.marks }}){% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </span>
+                    </div>
+
+                    <div class="metric-card">
+                        <span class="metric-label">Performance Category</span>
+                        <span class="metric-value highlight">{{ result.performance_category }}</span>
+                    </div>
+
+                    <div class="metric-card">
+                        <span class="metric-label">Grade Distribution</span>
+                        <span class="metric-value">
+                            A: {{ result.grade_distribution.A }} | B: {{ result.grade_distribution.B }} | C: {{ result.grade_distribution.C }} | D: {{ result.grade_distribution.D }} | F: {{ result.grade_distribution.F }}
+                        </span>
+                    </div>
+
+                    <div class="metric-card">
+                        <span class="metric-label">Strong Subjects (>= 70)</span>
+                        <span class="metric-value text-success">
+                            {{ result.strong_subjects|join(', ') if result.strong_subjects else 'None' }}
+                        </span>
+                    </div>
+
+                    <div class="metric-card">
+                        <span class="metric-label">Subjects Needing Improvement (< 70)</span>
+                        <span class="metric-value text-danger">
+                            {{ result.weak_subjects|join(', ') if result.weak_subjects else 'None' }}
+                        </span>
+                    </div>
                 </div>
             </div>
-        {% endif %}
-    </div>
 
-    <!-- Beginner-friendly JavaScript for Dynamic Rows -->
-    <script>
-        // Function to add a new subject row
-        function addSubject() {
-            const container = document.getElementById('subjects-container');
-            const rowCount = container.getElementsByClassName('subject-row').length + 1;
+            <!-- Visual Chart for this Student -->
+            <div class="card-box">
+                <h4>Subject Performance Chart</h4>
+                <div class="chart-container">
+                    <canvas id="subjectChart"></canvas>
+                </div>
+            </div>
 
-            // Create a new div element for the subject row
-            const newRow = document.createElement('div');
-            newRow.className = 'subject-row';
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
 
-            // Set the inner HTML of the new row
-            newRow.innerHTML = `
-                <input 
-                    type="text" 
-                    name="subject_name" 
-                    placeholder="Subject name" 
-                    value="Subject ${rowCount}" 
-                    required
-                >
-                <input 
-                    type="number" 
-                    name="subject_marks" 
-                    min="0" 
-                    max="100" 
-                    step="any" 
-                    placeholder="Marks (0-100)" 
-                    required
-                >
-                <button type="button" class="btn-remove" onclick="removeSubject(this)">Remove</button>
-            `;
+{% block scripts %}
+<script>
+    // Dynamic Subject Rows
+    function addSubject() {
+        const container = document.getElementById('subjects-container');
+        const count = container.getElementsByClassName('subject-row').length + 1;
+        const newRow = document.createElement('div');
+        newRow.className = 'subject-row';
+        newRow.innerHTML = `
+            <input type="text" name="subject_name" placeholder="Subject Name" value="Subject ${count}" required>
+            <input type="number" name="subject_marks" min="0" max="100" step="any" placeholder="Marks (0-100)" required>
+            <button type="button" class="btn-remove" onclick="removeSubject(this)">Remove</button>
+        `;
+        container.appendChild(newRow);
+    }
 
-            // Append the new row to the container
-            container.appendChild(newRow);
+    function removeSubject(button) {
+        const container = document.getElementById('subjects-container');
+        const rows = container.getElementsByClassName('subject-row');
+        if (rows.length > 1) {
+            button.closest('.subject-row').remove();
+        } else {
+            alert('At least one subject row is required.');
         }
+    }
 
-        // Function to remove a subject row
-        function removeSubject(button) {
-            const container = document.getElementById('subjects-container');
-            const rows = container.getElementsByClassName('subject-row');
-
-            // Keep at least one subject row visible at all times
-            if (rows.length > 1) {
-                button.parentElement.remove();
-            } else {
-                alert('At least one subject row is required.');
+    // Chart.js render for Student Subject Performance
+    {% if result %}
+        const ctx = document.getElementById('subjectChart').getContext('2d');
+        const labels = {{ result.subjects | map(attribute='name') | list | tojson }};
+        const data = {{ result.subjects | map(attribute='marks') | list | tojson }};
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Marks (out of 100)',
+                    data: data,
+                    backgroundColor: data.map(m => m >= 70 ? 'rgba(46, 204, 113, 0.7)' : (m >= 40 ? 'rgba(52, 152, 219, 0.7)' : 'rgba(231, 76, 60, 0.7)')),
+                    borderColor: data.map(m => m >= 70 ? '#27ae60' : (m >= 40 ? '#2980b9' : '#c0392b')),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
             }
-        }
-    </script>
-
-</body>
-</html>
+        });
+    {% endif %}
+</script>
+{% endblock %}

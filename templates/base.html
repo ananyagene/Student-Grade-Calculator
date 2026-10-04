@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Student Result Management System{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Lightweight Chart.js from CDN for clean charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('index') }}" class="nav-brand">🎓 ResultManager</a>
+            <div class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-link {% if request.path == '/' %}active{% endif %}">➕ Add / Calculate</a>
+                <a href="{{ url_for('student_list') }}" class="nav-link {% if request.path == '/students' %}active{% endif %}">📋 All Students</a>
+                <a href="{{ url_for('analytics') }}" class="nav-link {% if request.path == '/analytics' %}active{% endif %}">📊 Class Analytics</a>
+                <a href="{{ url_for('export_csv') }}" class="nav-link btn-nav-export">📥 Export CSV</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <p>Student Result Management System &copy; 2026-27 | Simple & Accessible Education Tools</p>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

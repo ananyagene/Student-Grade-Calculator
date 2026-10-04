@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}{{ student.student_name }} - Result Details{% endblock %}
+
+{% block content %}
+<div class="calculator-container" style="max-width: 780px;">
+    <div class="page-header">
+        <div>
+            <h2>Student Result Details</h2>
+            <p class="subtitle">Complete scorecard and analytical report for {{ student.student_name }}.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('export_pdf', student_id=student.id) }}" class="btn-export-pdf">📄 Download PDF Report</a>
+            <a href="{{ url_for('student_list') }}" class="btn-secondary">⬅️ Back to List</a>
+        </div>
+    </div>
+
+    <!-- Result Summary Card -->
+    <div class="result-summary-card">
+        <div class="summary-header">
+            <h3>RESULT SUMMARY</h3>
+            <span class="status-badge {{ 'status-pass' if student.status == 'PASS' else 'status-fail' }}">
+                {{ student.status }}
+            </span>
+        </div>
+        
+        <div class="summary-meta-grid">
+            <div><strong>Student:</strong> {{ student.student_name }}</div>
+            <div><strong>Roll Number:</strong> {{ student.roll_number }}</div>
+            <div><strong>Course:</strong> {{ student.course }}</div>
+            <div><strong>Semester:</strong> {{ student.semester }}</div>
+            <div><strong>Academic Year:</strong> {{ student.academic_year }}</div>
+            <div><strong>Total Subjects:</strong> {{ student.total_subjects }}</div>
+            <div><strong>Total Marks:</strong> {{ student.total }} / {{ student.max_marks }}</div>
+            <div><strong>Percentage:</strong> {{ student.percentage_formatted }}</div>
+            <div><strong>Overall Grade:</strong> <span class="grade-badge">{{ student.grade }}</span></div>
+            <div><strong>Overall Status:</strong> <b>{{ student.status }}</b></div>
+        </div>
+
+        <div class="performance-message-box">
+            <strong>Feedback:</strong> {{ student.performance_message }}
+        </div>
+
+        {% if student.failed_count > 0 %}
+            <div class="fail-safe-box warning">
+                ⚠️ {{ student.fail_safe_message }}
+            </div>
+        {% else %}
+            <div class="fail-safe-box success">
+                ✅ {{ student.fail_safe_message }}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Subject-Wise Table -->
+    <div class="card-box">
+        <h4>Subject Results</h4>
+        <table class="grades-table">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                    <th>Status</th>
+                    <th>Remark</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in student.subjects %}
+                    <tr>
+                        <td><b>{{ sub.name }}</b></td>
+                        <td>{{ sub.marks }}</td>
+                        <td><span class="grade-badge">{{ sub.grade }}</span></td>
+                        <td>
+                            <span class="status-badge {{ 'status-pass' if sub.status == 'PASS' else 'status-fail' }}">
+                                {{ sub.status }}
+                            </span>
+                        </td>
+                        <td>{{ sub.remark }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Analytical Breakdown Cards -->
+    <div class="card-box">
+        <h4>Performance Analytics</h4>
+        <div class="analytics-grid">
+            <div class="metric-card">
+                <span class="metric-label">Average Marks</span>
+                <span class="metric-value">{{ student.average_marks }} / 100</span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Passed Subjects</span>
+                <span class="metric-value">{{ student.passed_count }} / {{ student.total_subjects }}</span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Failed Subjects</span>
+                <span class="metric-value">{{ student.failed_count }} / {{ student.total_subjects }}</span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Pass Percentage</span>
+                <span class="metric-value">{{ student.pass_percentage }}%</span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Highest Scoring Subject</span>
+                <span class="metric-value">
+                    {% for s in student.highest_subjects %}
+                        {{ s.name }} ({{ s.marks }}){% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Lowest Scoring Subject</span>
+                <span class="metric-value">
+                    {% for s in student.lowest_subjects %}
+                        {{ s.name }} ({{ s.marks }}){% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Performance Category</span>
+                <span class="metric-value highlight">{{ student.performance_category }}</span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Grade Distribution</span>
+                <span class="metric-value">
+                    A: {{ student.grade_distribution.A }} | B: {{ student.grade_distribution.B }} | C: {{ student.grade_distribution.C }} | D: {{ student.grade_distribution.D }} | F: {{ student.grade_distribution.F }}
+                </span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Strong Subjects (>= 70)</span>
+                <span class="metric-value text-success">
+                    {{ student.strong_subjects|join(', ') if student.strong_subjects else 'None' }}
+                </span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Subjects Needing Improvement (< 70)</span>
+                <span class="metric-value text-danger">
+                    {{ student.weak_subjects|join(', ') if student.weak_subjects else 'None' }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visual Chart for this Student -->
+    <div class="card-box">
+        <h4>Subject Performance Chart</h4>
+        <div class="chart-container">
+            <canvas id="subjectChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ctx = document.getElementById('subjectChart').getContext('2d');
+    const labels = {{ student.subjects | map(attribute='name') | list | tojson }};
+    const data = {{ student.subjects | map(attribute='marks') | list | tojson }};
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Marks (out of 100)',
+                data: data,
+                backgroundColor: data.map(m => m >= 70 ? 'rgba(46, 204, 113, 0.7)' : (m >= 40 ? 'rgba(52, 152, 219, 0.7)' : 'rgba(231, 76, 60, 0.7)')),
+                borderColor: data.map(m => m >= 70 ? '#27ae60' : (m >= 40 ? '#2980b9' : '#c0392b')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

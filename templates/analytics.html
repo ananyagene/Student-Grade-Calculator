@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Class Analytics - Result Management System{% endblock %}
+
+{% block content %}
+<div class="full-page-container">
+    <div class="page-header">
+        <div>
+            <h2>Class Performance Analytics</h2>
+            <p class="subtitle">Comprehensive overview of class averages, pass rates, and visual charts.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('export_csv') }}" class="btn-secondary">📥 Export CSV</a>
+            <a href="{{ url_for('index') }}" class="btn-primary">➕ Add Student</a>
+        </div>
+    </div>
+
+    {% if total_students > 0 %}
+        <!-- Summary Stats Grid -->
+        <div class="analytics-metrics-grid">
+            <div class="stat-card">
+                <span class="stat-label">Total Students</span>
+                <span class="stat-val">{{ total_students }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Class Average</span>
+                <span class="stat-val">{{ class_avg }}%</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Highest Scorer</span>
+                <span class="stat-val text-success">
+                    {% if highest_student %}
+                        {{ highest_student.student_name }} ({{ highest_student.percentage_formatted }})
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Lowest Scorer</span>
+                <span class="stat-val text-danger">
+                    {% if lowest_student %}
+                        {{ lowest_student.student_name }} ({{ lowest_student.percentage_formatted }})
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Students Passed</span>
+                <span class="stat-val text-success">{{ passed_students }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Students Failed</span>
+                <span class="stat-val text-danger">{{ failed_students }}</span>
+            </div>
+            <div class="stat-card full-span">
+                <span class="stat-label">Class Pass Percentage</span>
+                <span class="stat-val">{{ class_pass_pct }}%</span>
+            </div>
+        </div>
+
+        <!-- Visual Charts Section -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Grade Distribution Chart</h3>
+                <p class="chart-desc">Number of students receiving each overall letter grade</p>
+                <div class="chart-box">
+                    <canvas id="gradeDistChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>Pass / Fail Chart</h3>
+                <p class="chart-desc">Overall proportion of passed vs. failed students</p>
+                <div class="chart-box">
+                    <canvas id="passFailChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card full-span">
+                <h3>Student Performance Comparison</h3>
+                <p class="chart-desc">Comparison of overall percentage scores across all students</p>
+                <div class="chart-box">
+                    <canvas id="allStudentsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <h3>No Analytics Data Available</h3>
+            <p>Add students and calculate their results to see class-wide statistics and charts.</p>
+            <a href="{{ url_for('index') }}" class="btn-primary">➕ Add Your First Student</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if total_students > 0 %}
+<script>
+    // 1. Grade Distribution Chart
+    const ctxGrade = document.getElementById('gradeDistChart').getContext('2d');
+    new Chart(ctxGrade, {
+        type: 'bar',
+        data: {
+            labels: ['Grade A', 'Grade B', 'Grade C', 'Grade D', 'Grade F'],
+            datasets: [{
+                label: 'Student Count',
+                data: [
+                    {{ grade_distribution.A }},
+                    {{ grade_distribution.B }},
+                    {{ grade_distribution.C }},
+                    {{ grade_distribution.D }},
+                    {{ grade_distribution.F }}
+                ],
+                backgroundColor: [
+                    '#2ecc71',
+                    '#3498db',
+                    '#f39c12',
+                    '#e67e22',
+                    '#e74c3c'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 }
+                }
+            }
+        }
+    });
+
+    // 2. Pass vs Fail Chart
+    const ctxPassFail = document.getElementById('passFailChart').getContext('2d');
+    new Chart(ctxPassFail, {
+        type: 'doughnut',
+        data: {
+            labels: ['Passed', 'Failed'],
+            datasets: [{
+                data: [{{ passed_students }}, {{ failed_students }}],
+                backgroundColor: ['#2ecc71', '#e74c3c'],
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+
+    // 3. All Students Performance Chart
+    const ctxAll = document.getElementById('allStudentsChart').getContext('2d');
+    const studentNames = {{ all_students | map(attribute='student_name') | list | tojson }};
+    const studentPercentages = {{ all_students | map(attribute='percentage') | list | tojson }};
+
+    new Chart(ctxAll, {
+        type: 'bar',
+        data: {
+            labels: studentNames,
+            datasets: [{
+                label: 'Percentage (%)',
+                data: studentPercentages,
+                backgroundColor: studentPercentages.map(p => p >= 70 ? 'rgba(46, 204, 113, 0.7)' : (p >= 40 ? 'rgba(52, 152, 219, 0.7)' : 'rgba(231, 76, 60, 0.7)')),
+                borderColor: studentPercentages.map(p => p >= 70 ? '#27ae60' : (p >= 40 ? '#2980b9' : '#c0392b')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}
