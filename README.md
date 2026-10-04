@@ -1,6 +1,6 @@
 # Student Grade Calculator
 
-A simple beginner-friendly web application that calculates a student's total marks, percentage, grades, and pass/fail status.
+A simple beginner-friendly web application that calculates a student's total marks, percentage, grades, pass/fail status, and subject-wise remarks.
 
 The project is being developed step-by-step to practice **Python, Flask, HTML, CSS, JavaScript, and Git/GitHub**.
 
@@ -37,6 +37,17 @@ The project is being developed step-by-step to practice **Python, Flask, HTML, C
 * Calculate overall PASS/FAIL status
 * Overall result is FAIL if even one subject has less than 40 marks
 
+### Version 1E — Subject-wise Remarks
+
+* Display a remark for every subject
+* Remarks are based on the subject's marks
+* 90–100 → Excellent
+* 80–89 → Very Good
+* 70–79 → Good
+* 60–69 → Satisfactory
+* 40–59 → Needs Improvement
+* Below 40 → Fail
+
 ## Grading System
 
 | Percentage | Grade |
@@ -52,6 +63,17 @@ The project is being developed step-by-step to practice **Python, Flask, HTML, C
 * Marks ≥ 40 → PASS
 * Marks < 40 → FAIL
 * All subjects must pass for the overall result to be PASS
+
+## Subject-wise Remarks
+
+| Marks    | Remark            |
+| -------- | ----------------- |
+| 90–100   | Excellent         |
+| 80–89    | Very Good         |
+| 70–79    | Good              |
+| 60–69    | Satisfactory      |
+| 40–59    | Needs Improvement |
+| Below 40 | Fail              |
 
 ## Tech Stack
 
@@ -107,7 +129,8 @@ http://127.0.0.1:5000/
 * [x] Version 1B — Add/Remove Subjects
 * [x] Version 1C — Individual Subject Grades
 * [x] Version 1D — Pass/Fail Status
-* [ ] Version 1E — Coming Soon
+* [x] Version 1E — Subject-wise Remarks
+* [ ] Version 1F — Coming Soon
 
 ## Purpose
 
