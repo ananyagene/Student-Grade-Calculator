@@ -15,6 +15,21 @@ def calculate_grade(percentage):
     else:
         return 'F'
 
+# Function to determine descriptive remark based on subject marks
+def calculate_remark(marks):
+    if marks >= 90:
+        return 'Excellent'
+    elif marks >= 80:
+        return 'Very Good'
+    elif marks >= 70:
+        return 'Good'
+    elif marks >= 60:
+        return 'Satisfactory'
+    elif marks >= 40:
+        return 'Needs Improvement'
+    else:
+        return 'Fail'
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     result = None
@@ -64,15 +79,17 @@ def index():
                         error = f"Marks for '{name_clean}' must be between 0 and 100."
                         break
                     
-                    # Individual grade and pass/fail status for this subject
+                    # Individual grade, pass/fail status, and remark for this subject
                     subject_grade = calculate_grade(mark_val)
                     subject_status = 'PASS' if mark_val >= 40 else 'FAIL'
+                    subject_remark = calculate_remark(mark_val)
 
                     parsed_subjects.append({
                         'name': name_clean,
                         'marks': int(mark_val) if mark_val.is_integer() else round(mark_val, 2),
                         'grade': subject_grade,
-                        'status': subject_status
+                        'status': subject_status,
+                        'remark': subject_remark
                     })
                 except ValueError:
                     error = f"Please enter valid numeric marks for '{name_clean}'."
