@@ -79,6 +79,7 @@
                             <th>Subject</th>
                             <th>Marks</th>
                             <th>Grade</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -87,6 +88,11 @@
                                 <td>{{ sub.name }}</td>
                                 <td>{{ sub.marks }}</td>
                                 <td><span class="grade-badge">{{ sub.grade }}</span></td>
+                                <td>
+                                    <span class="status-badge {{ 'status-pass' if sub.status == 'PASS' else 'status-fail' }}">
+                                        {{ sub.status }}
+                                    </span>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -97,6 +103,11 @@
                     <p><strong>Total:</strong> {{ result.total }} / {{ result.max_marks }}</p>
                     <p><strong>Percentage:</strong> {{ result.percentage }}</p>
                     <p><strong>Overall Grade:</strong> <span class="grade-badge">{{ result.grade }}</span></p>
+                    <p><strong>Overall Status:</strong> 
+                        <span class="status-badge {{ 'status-pass' if result.status == 'PASS' else 'status-fail' }}">
+                            {{ result.status }}
+                        </span>
+                    </p>
                 </div>
             </div>
         {% endif %}

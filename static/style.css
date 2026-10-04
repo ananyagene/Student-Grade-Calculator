@@ -195,3 +195,23 @@ input[type="number"]:focus {
     padding-top: 10px;
 }
 
+/* Status Badges (PASS / FAIL) */
+.status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.status-pass {
+    background-color: #27ae60;
+    color: #ffffff;
+}
+
+.status-fail {
+    background-color: #e74c3c;
+    color: #ffffff;
+}
+
+

@@ -64,13 +64,15 @@ def index():
                         error = f"Marks for '{name_clean}' must be between 0 and 100."
                         break
                     
-                    # Individual grade for this subject
+                    # Individual grade and pass/fail status for this subject
                     subject_grade = calculate_grade(mark_val)
+                    subject_status = 'PASS' if mark_val >= 40 else 'FAIL'
 
                     parsed_subjects.append({
                         'name': name_clean,
                         'marks': int(mark_val) if mark_val.is_integer() else round(mark_val, 2),
-                        'grade': subject_grade
+                        'grade': subject_grade,
+                        'status': subject_status
                     })
                 except ValueError:
                     error = f"Please enter valid numeric marks for '{name_clean}'."
@@ -84,13 +86,21 @@ def index():
                 percentage = (total / max_marks) * 100
                 overall_grade = calculate_grade(percentage)
 
+                # Overall status: PASS only if ALL subjects have marks >= 40
+                overall_status = 'PASS'
+                for s in parsed_subjects:
+                    if s['status'] == 'FAIL':
+                        overall_status = 'FAIL'
+                        break
+
                 result = {
                     'student_name': student_name,
                     'subjects': parsed_subjects,
                     'total': int(total) if total.is_integer() else round(total, 2),
                     'max_marks': max_marks,
                     'percentage': f"{percentage:.2f}%",
-                    'grade': overall_grade
+                    'grade': overall_grade,
+                    'status': overall_status
                 }
 
     return render_template('index.html', result=result, error=error, subjects=subjects)
