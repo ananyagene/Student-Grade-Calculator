@@ -32,51 +32,37 @@
                 >
             </div>
 
-            <div class="form-group">
-                <label for="subject1">Subject 1 Marks (out of 100):</label>
-                <input 
-                    type="number" 
-                    id="subject1" 
-                    name="subject1" 
-                    min="0" 
-                    max="100" 
-                    step="any"
-                    placeholder="e.g. 85"
-                    value="{{ request.form.get('subject1', '') }}"
-                    required
-                >
+            <label>Subjects & Marks:</label>
+            <!-- Dynamic Subjects Container (Starts with 3 rows by default) -->
+            <div id="subjects-container">
+                {% for sub in subjects %}
+                    <div class="subject-row">
+                        <input 
+                            type="text" 
+                            name="subject_name" 
+                            placeholder="Subject name" 
+                            value="{{ sub.name }}" 
+                            required
+                        >
+                        <input 
+                            type="number" 
+                            name="subject_marks" 
+                            min="0" 
+                            max="100" 
+                            step="any" 
+                            placeholder="Marks (0-100)" 
+                            value="{{ sub.marks }}" 
+                            required
+                        >
+                        <button type="button" class="btn-remove" onclick="removeSubject(this)">Remove</button>
+                    </div>
+                {% endfor %}
             </div>
 
-            <div class="form-group">
-                <label for="subject2">Subject 2 Marks (out of 100):</label>
-                <input 
-                    type="number" 
-                    id="subject2" 
-                    name="subject2" 
-                    min="0" 
-                    max="100" 
-                    step="any"
-                    placeholder="e.g. 78"
-                    value="{{ request.form.get('subject2', '') }}"
-                    required
-                >
-            </div>
+            <!-- Add Subject Button -->
+            <button type="button" class="btn-add" onclick="addSubject()">+ Add Subject</button>
 
-            <div class="form-group">
-                <label for="subject3">Subject 3 Marks (out of 100):</label>
-                <input 
-                    type="number" 
-                    id="subject3" 
-                    name="subject3" 
-                    min="0" 
-                    max="100" 
-                    step="any"
-                    placeholder="e.g. 92"
-                    value="{{ request.form.get('subject3', '') }}"
-                    required
-                >
-            </div>
-
+            <!-- Calculate Grade Submit Button -->
             <button type="submit" class="btn-calculate">Calculate Grade</button>
         </form>
 
@@ -85,12 +71,62 @@
             <div class="result-box">
                 <h3>Calculation Result</h3>
                 <p><strong>Student:</strong> {{ result.student_name }}</p>
-                <p><strong>Total:</strong> {{ result.total }} / 300</p>
+                <p><strong>Total:</strong> {{ result.total }} / {{ result.max_marks }}</p>
                 <p><strong>Percentage:</strong> {{ result.percentage }}</p>
                 <p><strong>Grade:</strong> <span class="grade-badge">{{ result.grade }}</span></p>
             </div>
         {% endif %}
     </div>
+
+    <!-- Beginner-friendly JavaScript for Dynamic Rows -->
+    <script>
+        // Function to add a new subject row
+        function addSubject() {
+            const container = document.getElementById('subjects-container');
+            const rowCount = container.getElementsByClassName('subject-row').length + 1;
+
+            // Create a new div element for the subject row
+            const newRow = document.createElement('div');
+            newRow.className = 'subject-row';
+
+            // Set the inner HTML of the new row
+            newRow.innerHTML = `
+                <input 
+                    type="text" 
+                    name="subject_name" 
+                    placeholder="Subject name" 
+                    value="Subject ${rowCount}" 
+                    required
+                >
+                <input 
+                    type="number" 
+                    name="subject_marks" 
+                    min="0" 
+                    max="100" 
+                    step="any" 
+                    placeholder="Marks (0-100)" 
+                    required
+                >
+                <button type="button" class="btn-remove" onclick="removeSubject(this)">Remove</button>
+            `;
+
+            // Append the new row to the container
+            container.appendChild(newRow);
+        }
+
+        // Function to remove a subject row
+        function removeSubject(button) {
+            const container = document.getElementById('subjects-container');
+            const rows = container.getElementsByClassName('subject-row');
+
+            // Keep at least one subject row visible at all times
+            if (rows.length > 1) {
+                button.parentElement.remove();
+            } else {
+                alert('At least one subject row is required.');
+            }
+        }
+    </script>
 
 </body>
 </html>
