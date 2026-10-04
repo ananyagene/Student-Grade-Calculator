@@ -1,0 +1,111 @@
+/* Simple, clean styling for Student Grade Calculator */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+    color: #333333;
+    margin: 0;
+    padding: 30px 15px;
+    display: flex;
+    justify-content: center;
+}
+
+.calculator-container {
+    background-color: #ffffff;
+    max-width: 450px;
+    width: 100%;
+    padding: 25px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.btn-calculate {
+    width: 100%;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.btn-calculate:hover {
+    background-color: #2980b9;
+}
+
+/* Error message styling */
+.error-box {
+    background-color: #fce4e4;
+    border: 1px solid #fcc2c3;
+    color: #cc0033;
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+/* Calculation result styling */
+.result-box {
+    margin-top: 25px;
+    padding: 15px 20px;
+    background-color: #eafaf1;
+    border: 1px solid #d4efdf;
+    border-radius: 5px;
+}
+
+.result-box h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #27ae60;
+}
+
+.result-box p {
+    margin: 8px 0;
+    font-size: 15px;
+}
+
+.grade-badge {
+    display: inline-block;
+    background-color: #27ae60;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 2px 10px;
+    border-radius: 4px;
+}

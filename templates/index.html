@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Grade Calculator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="calculator-container">
+        <h2>Student Grade Calculator</h2>
+
+        <!-- Show error message if validation fails -->
+        {% if error %}
+            <div class="error-box">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <!-- Grade Input Form -->
+        <form method="POST" action="/">
+            <div class="form-group">
+                <label for="student_name">Student Name:</label>
+                <input 
+                    type="text" 
+                    id="student_name" 
+                    name="student_name" 
+                    placeholder="Enter student name"
+                    value="{{ request.form.get('student_name', '') }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="subject1">Subject 1 Marks (out of 100):</label>
+                <input 
+                    type="number" 
+                    id="subject1" 
+                    name="subject1" 
+                    min="0" 
+                    max="100" 
+                    step="any"
+                    placeholder="e.g. 85"
+                    value="{{ request.form.get('subject1', '') }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="subject2">Subject 2 Marks (out of 100):</label>
+                <input 
+                    type="number" 
+                    id="subject2" 
+                    name="subject2" 
+                    min="0" 
+                    max="100" 
+                    step="any"
+                    placeholder="e.g. 78"
+                    value="{{ request.form.get('subject2', '') }}"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="subject3">Subject 3 Marks (out of 100):</label>
+                <input 
+                    type="number" 
+                    id="subject3" 
+                    name="subject3" 
+                    min="0" 
+                    max="100" 
+                    step="any"
+                    placeholder="e.g. 92"
+                    value="{{ request.form.get('subject3', '') }}"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn-calculate">Calculate Grade</button>
+        </form>
+
+        <!-- Display Results on the same page -->
+        {% if result %}
+            <div class="result-box">
+                <h3>Calculation Result</h3>
+                <p><strong>Student:</strong> {{ result.student_name }}</p>
+                <p><strong>Total:</strong> {{ result.total }} / 300</p>
+                <p><strong>Percentage:</strong> {{ result.percentage }}</p>
+                <p><strong>Grade:</strong> <span class="grade-badge">{{ result.grade }}</span></p>
+            </div>
+        {% endif %}
+    </div>
+
+</body>
+</html>
