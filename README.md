@@ -1,37 +1,43 @@
 # Student Grade Calculator
 
-A simple beginner-friendly web application built with Python and Flask to calculate student marks, percentage, and grades.
+A simple beginner-friendly web application that calculates a student's total marks, percentage, grades, and pass/fail status.
 
-This project is being developed gradually, with new features added step by step to keep the code simple and easy to understand.
+The project is being developed step-by-step to practice **Python, Flask, HTML, CSS, JavaScript, and Git/GitHub**.
 
 ## Features
 
 ### Version 1A — Basic Grade Calculator
 
 * Enter student name
-* Enter marks for subjects
+* Enter marks for 3 subjects
 * Calculate total marks
 * Calculate percentage
 * Calculate overall grade
 * Basic input validation
-* Simple and clean interface
 
 ### Version 1B — Dynamic Subjects
 
-* Add new subjects dynamically
+* Add multiple subjects dynamically
 * Remove subjects
-* Enter any number of subjects
-* Calculate total and percentage based on subjects entered
-* Validate subject names and marks
+* Start with 3 subjects
+* Support any number of subjects
+* Recalculate total, percentage, and overall grade automatically
 
 ### Version 1C — Individual Subject Grades
 
-* Calculate a grade for each subject
-* Display subject name, marks, and individual grade
+* Calculate a grade for every subject
+* Display subject-wise marks and grades
 * Continue displaying total marks, percentage, and overall grade
-* Works with any number of subjects
 
-## Grade System
+### Version 1D — Pass/Fail Status
+
+* Display PASS/FAIL status for every subject
+* 40 or above = PASS
+* Below 40 = FAIL
+* Calculate overall PASS/FAIL status
+* Overall result is FAIL if even one subject has less than 40 marks
+
+## Grading System
 
 | Percentage | Grade |
 | ---------- | ----- |
@@ -41,6 +47,12 @@ This project is being developed gradually, with new features added step by step 
 | 60–69      | D     |
 | Below 60   | F     |
 
+## Pass/Fail System
+
+* Marks ≥ 40 → PASS
+* Marks < 40 → FAIL
+* All subjects must pass for the overall result to be PASS
+
 ## Tech Stack
 
 * Python
@@ -48,6 +60,7 @@ This project is being developed gradually, with new features added step by step 
 * HTML
 * CSS
 * JavaScript
+* Git & GitHub
 
 ## Project Structure
 
@@ -55,38 +68,47 @@ This project is being developed gradually, with new features added step by step 
 student-grade-calculator/
 │
 ├── app.py
+├── README.md
+│
 ├── templates/
 │   └── index.html
+│
 └── static/
     └── style.css
 ```
 
-## How to Run Locally
+## How to Run
 
-Install Flask:
+1. Clone the repository.
+
+2. Open the project folder in the terminal.
+
+3. Install Flask if it is not already installed:
 
 ```bash
 pip install flask
 ```
 
-Run the application:
+4. Run the application:
 
 ```bash
 python app.py
 ```
 
-Then open the local URL provided by Flask in your browser.
+5. Open the local URL shown in the terminal, usually:
+
+```text
+http://127.0.0.1:5000/
+```
 
 ## Development Progress
 
 * [x] Version 1A — Basic Grade Calculator
 * [x] Version 1B — Add/Remove Subjects
 * [x] Version 1C — Individual Subject Grades
-* [ ] Version 1D — Coming Soon
-* [ ] More features coming
+* [x] Version 1D — Pass/Fail Status
+* [ ] Version 1E — Coming Soon
 
 ## Purpose
 
-This is a learning project focused on understanding how a simple Python backend and frontend work together.
-
-The application is being built incrementally, with each version introducing one new feature while keeping the code beginner-friendly and easy to understand.
+This project is being developed as a practical learning project to understand the basics of **Python, Flask, frontend development, validation, Git, and GitHub** through gradual feature development.
