@@ -1,15 +1,15 @@
 # Student Grade Calculator
 
-A simple beginner-friendly web application that calculates a student's total marks, percentage, grades, pass/fail status, and subject-wise remarks.
+A beginner-friendly Student Result Management System built using Python, Flask, HTML, CSS, JavaScript, and SQLite.
 
-The project is being developed step-by-step to practice **Python, Flask, HTML, CSS, JavaScript, and Git/GitHub**.
+The project started as a simple grade calculator and is being gradually developed into a complete student result management application.
 
 ## Features
 
 ### Version 1A — Basic Grade Calculator
 
 * Enter student name
-* Enter marks for 3 subjects
+* Enter marks for subjects
 * Calculate total marks
 * Calculate percentage
 * Calculate overall grade
@@ -17,30 +17,26 @@ The project is being developed step-by-step to practice **Python, Flask, HTML, C
 
 ### Version 1B — Dynamic Subjects
 
-* Add multiple subjects dynamically
+* Add subjects dynamically
 * Remove subjects
-* Start with 3 subjects
 * Support any number of subjects
-* Recalculate total, percentage, and overall grade automatically
+* Recalculate results automatically
 
 ### Version 1C — Individual Subject Grades
 
-* Calculate a grade for every subject
+* Calculate grade for every subject
 * Display subject-wise marks and grades
-* Continue displaying total marks, percentage, and overall grade
 
 ### Version 1D — Pass/Fail Status
 
-* Display PASS/FAIL status for every subject
+* Subject-wise PASS/FAIL status
 * 40 or above = PASS
 * Below 40 = FAIL
-* Calculate overall PASS/FAIL status
-* Overall result is FAIL if even one subject has less than 40 marks
+* Overall PASS/FAIL status
 
 ### Version 1E — Subject-wise Remarks
 
-* Display a remark for every subject
-* Remarks are based on the subject's marks
+* Subject-wise performance remarks
 * 90–100 → Excellent
 * 80–89 → Very Good
 * 70–79 → Good
@@ -48,15 +44,103 @@ The project is being developed step-by-step to practice **Python, Flask, HTML, C
 * 40–59 → Needs Improvement
 * Below 40 → Fail
 
+### Version 1F — Student Result Management System
+
+#### Result Analysis
+
+* Result Summary Card
+* Highest Scoring Subject
+* Lowest Scoring Subject
+* Average Marks
+* Automatic Performance Message
+* Passed Subjects Count
+* Failed Subjects Count
+* Grade Distribution
+* Performance Category
+* Strong Subjects
+* Subjects Needing Improvement
+* Pass Percentage
+* Fail-safe Result Message
+
+#### Student Details
+
+* Student Name
+* Roll Number
+* Course/Class
+* Semester
+* Academic Year
+
+#### Multiple Students
+
+* Add multiple students
+* Store multiple student results
+* View saved students
+* View individual student results
+
+#### Search & Filter
+
+* Search by student name
+* Search by roll number
+* Filter by PASS/FAIL
+* Filter by grade
+
+#### Sorting
+
+* Sort by percentage
+* Highest to lowest percentage
+* Lowest to highest percentage
+* Sort by name
+* A–Z and Z–A
+
+#### Class Analytics
+
+* Total students
+* Class average percentage
+* Highest scoring student
+* Lowest scoring student
+* Number of passed students
+* Number of failed students
+* Class pass percentage
+
+#### Charts
+
+* Grade distribution chart
+* Subject performance chart
+* Pass/fail chart
+
+#### Export
+
+* Export student results as CSV
+* Export student result as PDF
+
+#### UI Improvements
+
+* Responsive design
+* Mobile-friendly layout
+* Result summary cards
+* Improved tables
+* Better spacing
+* Clear PASS/FAIL indicators
+* Improved error messages
+* User-friendly empty states
+
+#### Data Persistence
+
+* SQLite database
+* Save student information
+* Save subject information
+* Save marks
+* Retrieve saved students after restarting the application
+
 ## Grading System
 
-| Percentage | Grade |
-| ---------- | ----- |
-| 90–100     | A     |
-| 80–89      | B     |
-| 70–79      | C     |
-| 60–69      | D     |
-| Below 60   | F     |
+| Marks/Percentage | Grade |
+| ---------------- | ----- |
+| 90–100           | A     |
+| 80–89            | B     |
+| 70–79            | C     |
+| 60–69            | D     |
+| Below 60         | F     |
 
 ## Pass/Fail System
 
@@ -75,6 +159,16 @@ The project is being developed step-by-step to practice **Python, Flask, HTML, C
 | 40–59    | Needs Improvement |
 | Below 40 | Fail              |
 
+## Performance Categories
+
+| Percentage | Category          |
+| ---------- | ----------------- |
+| 90–100     | Excellent         |
+| 80–89      | Very Good         |
+| 70–79      | Good              |
+| 60–69      | Average           |
+| Below 60   | Needs Improvement |
+
 ## Tech Stack
 
 * Python
@@ -82,7 +176,9 @@ The project is being developed step-by-step to practice **Python, Flask, HTML, C
 * HTML
 * CSS
 * JavaScript
-* Git & GitHub
+* SQLite
+* Git
+* GitHub
 
 ## Project Structure
 
@@ -95,8 +191,11 @@ student-grade-calculator/
 ├── templates/
 │   └── index.html
 │
-└── static/
-    └── style.css
+├── static/
+│   └── style.css
+│
+└── database/
+    └── students.db
 ```
 
 ## How to Run
@@ -105,13 +204,15 @@ student-grade-calculator/
 
 2. Open the project folder in the terminal.
 
-3. Install Flask if it is not already installed:
+3. Install the required dependencies.
 
 ```bash
 pip install flask
 ```
 
-4. Run the application:
+Install any additional libraries required for CSV/PDF/chart functionality if they are used by the project.
+
+4. Run the Flask application.
 
 ```bash
 python app.py
@@ -130,8 +231,34 @@ http://127.0.0.1:5000/
 * [x] Version 1C — Individual Subject Grades
 * [x] Version 1D — Pass/Fail Status
 * [x] Version 1E — Subject-wise Remarks
-* [ ] Version 1F — Coming Soon
+* [x] Version 1F — Student Result Management System
+
+## Future Improvements
+
+Possible future improvements may include:
+
+* User authentication
+* Admin dashboard
+* Role-based access
+* Cloud database
+* Online deployment improvements
+* Advanced analytics
+* AI-based performance insights
+* Automated recommendations
+* Student login portal
 
 ## Purpose
 
-This project is being developed as a practical learning project to understand the basics of **Python, Flask, frontend development, validation, Git, and GitHub** through gradual feature development.
+This project is being developed as a practical learning project to strengthen skills in:
+
+* Python
+* Flask
+* Backend development
+* Frontend development
+* JavaScript
+* SQL and databases
+* Data analysis
+* Git and GitHub
+* Application development
+
+The project is intentionally developed step-by-step so that each version introduces new concepts while keeping the application practical and understandable.
