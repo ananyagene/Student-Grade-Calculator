@@ -25,7 +25,7 @@ def get_db_connection():
     return conn
 
 def init_db():
-    """Initializes tables for students, subjects, and users with three roles."""
+    """Initializes tables for students, subjects, users, courses, semesters, and course_subjects."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -42,16 +42,23 @@ def init_db():
         )
     ''')
 
-    # Subjects table
+    # Subjects table (student marks per subject)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS subjects (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             student_id INTEGER NOT NULL,
             subject_name TEXT NOT NULL,
             marks REAL NOT NULL,
+            subject_code TEXT,
             FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
         )
     ''')
+
+    # Migration check: Ensure column 'subject_code' exists on 'subjects'
+    cursor.execute('PRAGMA table_info(subjects)')
+    sub_cols = [col['name'] for col in cursor.fetchall()]
+    if 'subject_code' not in sub_cols:
+        cursor.execute('ALTER TABLE subjects ADD COLUMN subject_code TEXT')
 
     # Users table for Authentication & RBAC (Supports ADMIN, TEACHER, STUDENT)
     cursor.execute('''
@@ -76,6 +83,124 @@ def init_db():
     if 'assigned_course' not in columns:
         cursor.execute('ALTER TABLE users ADD COLUMN assigned_course TEXT')
 
+    # Courses table (Version 2B)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS courses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_code TEXT UNIQUE NOT NULL,
+            course_name TEXT NOT NULL,
+            total_semesters INTEGER DEFAULT 4,
+            description TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
+    # Semesters table (Version 2B)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS semesters (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id INTEGER NOT NULL,
+            semester_number INTEGER NOT NULL,
+            semester_name TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+            UNIQUE(course_id, semester_number)
+        )
+    ''')
+
+    # Course Subjects / Curriculum table (Version 2B)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS course_subjects (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            subject_code TEXT NOT NULL,
+            subject_name TEXT NOT NULL,
+            course_id INTEGER NOT NULL,
+            semester INTEGER NOT NULL,
+            teacher_id INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE,
+            FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE SET NULL,
+            UNIQUE(course_id, semester, subject_code)
+        )
+    ''')
+
+    # Seed Default Courses if table is empty
+    course_count = cursor.execute('SELECT COUNT(*) as cnt FROM courses').fetchone()['cnt']
+    if course_count == 0:
+        default_courses = [
+            ('MCA AI', 'Master of Computer Applications (Artificial Intelligence)', 4, 'Advanced MCA program specialized in AI and Data Science'),
+            ('BCA', 'Bachelor of Computer Applications', 6, 'Undergraduate computer applications and software foundation'),
+            ('MCA', 'Master of Computer Applications (General)', 4, 'Postgraduate core computer applications and engineering'),
+            ('B.Tech', 'Bachelor of Technology (Computer Science)', 8, 'Four-year engineering degree in computer science')
+        ]
+        for c_code, c_name, c_sems, c_desc in default_courses:
+            cursor.execute('''
+                INSERT INTO courses (course_code, course_name, total_semesters, description)
+                VALUES (?, ?, ?, ?)
+            ''', (c_code, c_name, c_sems, c_desc))
+            c_id = cursor.lastrowid
+            # Seed semesters for this course
+            for sem_num in range(1, c_sems + 1):
+                cursor.execute('''
+                    INSERT OR IGNORE INTO semesters (course_id, semester_number, semester_name)
+                    VALUES (?, ?, ?)
+                ''', (c_id, sem_num, f'Semester {sem_num}'))
+
+    # Seed Default Curriculum Subjects if course_subjects is empty
+    subj_count = cursor.execute('SELECT COUNT(*) as cnt FROM course_subjects').fetchone()['cnt']
+    if subj_count == 0:
+        # Fetch course IDs
+        courses_dict = {r['course_code']: r['id'] for r in cursor.execute('SELECT id, course_code FROM courses').fetchall()}
+
+        # Subjects for MCA AI Sem 1
+        if 'MCA AI' in courses_dict:
+            mca_ai_id = courses_dict['MCA AI']
+            mca_ai_subs = [
+                ('MCA101', 'Python', 1),
+                ('MCA102', 'Mathematics', 1),
+                ('MCA103', 'DBMS', 1),
+                ('MCA104', 'OS', 1),
+                ('MCA105', 'Networking', 1),
+                ('MCA201', 'Machine Learning', 2),
+                ('MCA202', 'Data Structures', 2),
+                ('MCA203', 'Cloud Computing', 2)
+            ]
+            for s_code, s_name, s_sem in mca_ai_subs:
+                cursor.execute('''
+                    INSERT OR IGNORE INTO course_subjects (subject_code, subject_name, course_id, semester)
+                    VALUES (?, ?, ?, ?)
+                ''', (s_code, s_name, mca_ai_id, s_sem))
+
+        # Subjects for BCA Sem 2
+        if 'BCA' in courses_dict:
+            bca_id = courses_dict['BCA']
+            bca_subs = [
+                ('BCA101', 'C Programming', 1),
+                ('BCA102', 'Digital Electronics', 1),
+                ('BCA201', 'Python', 2),
+                ('BCA202', 'Mathematics', 2),
+                ('BCA203', 'DBMS', 2)
+            ]
+            for s_code, s_name, s_sem in bca_subs:
+                cursor.execute('''
+                    INSERT OR IGNORE INTO course_subjects (subject_code, subject_name, course_id, semester)
+                    VALUES (?, ?, ?, ?)
+                ''', (s_code, s_name, bca_id, s_sem))
+
+        # Subjects for MCA Sem 1
+        if 'MCA' in courses_dict:
+            mca_id = courses_dict['MCA']
+            mca_subs = [
+                ('MCA101', 'Physics', 1),
+                ('MCA102', 'Chemistry', 1),
+                ('MCA103', 'Biology', 1)
+            ]
+            for s_code, s_name, s_sem in mca_subs:
+                cursor.execute('''
+                    INSERT OR IGNORE INTO course_subjects (subject_code, subject_name, course_id, semester)
+                    VALUES (?, ?, ?, ?)
+                ''', (s_code, s_name, mca_id, s_sem))
+
     # Seed Default Admin Account if no admin exists
     admin_user = cursor.execute("SELECT * FROM users WHERE role = 'ADMIN'").fetchone()
     if not admin_user:
@@ -95,6 +220,11 @@ def init_db():
                 INSERT OR IGNORE INTO users (username, password_hash, role, name, student_id, assigned_course)
                 VALUES (?, ?, 'STUDENT', ?, ?, NULL)
             ''', (str(s['roll_number']), student_hash, s['name'], s['id']))
+
+    # Link teacher prof_mathur to MCA101 (Python) if both exist
+    prof_mathur = cursor.execute("SELECT id FROM users WHERE username = 'prof_mathur'").fetchone()
+    if prof_mathur:
+        cursor.execute("UPDATE course_subjects SET teacher_id = ? WHERE subject_code = 'MCA101'", (prof_mathur['id'],))
 
     conn.commit()
     conn.close()
@@ -342,6 +472,109 @@ def fetch_single_student_analyzed(student_id):
     conn.close()
     return analyze_student_data(dict(s_row), [dict(r) for r in sub_rows])
 
+def get_all_courses_with_stats():
+    """Fetches all courses with enrolled student count, semester count, and subject count."""
+    conn = get_db_connection()
+    courses = [dict(c) for c in conn.execute('SELECT * FROM courses ORDER BY course_code ASC').fetchall()]
+    for c in courses:
+        c_code = c['course_code'].strip()
+        c['student_count'] = conn.execute('SELECT COUNT(*) as cnt FROM students WHERE LOWER(TRIM(course)) = LOWER(TRIM(?))', (c_code,)).fetchone()['cnt']
+        c['subject_count'] = conn.execute('SELECT COUNT(*) as cnt FROM course_subjects WHERE course_id = ?', (c['id'],)).fetchone()['cnt']
+        c['semester_count'] = conn.execute('SELECT COUNT(*) as cnt FROM semesters WHERE course_id = ?', (c['id'],)).fetchone()['cnt']
+    conn.close()
+    return courses
+
+def get_course_details_with_semesters(course_id):
+    """Fetches course details and its associated semesters."""
+    conn = get_db_connection()
+    course = conn.execute('SELECT * FROM courses WHERE id = ?', (course_id,)).fetchone()
+    if not course:
+        conn.close()
+        return None, []
+    semesters = conn.execute('SELECT * FROM semesters WHERE course_id = ? ORDER BY semester_number ASC', (course_id,)).fetchall()
+    conn.close()
+    return dict(course), [dict(s) for s in semesters]
+
+def get_student_academic_profile_data(student_id):
+    """Fetches student profile along with enrolled curriculum subjects and assigned faculty."""
+    conn = get_db_connection()
+    student = conn.execute('SELECT * FROM students WHERE id = ?', (student_id,)).fetchone()
+    if not student:
+        conn.close()
+        return None
+    student_dict = dict(student)
+
+    # Match course from courses table
+    course_row = conn.execute('SELECT * FROM courses WHERE LOWER(TRIM(course_code)) = LOWER(TRIM(?))', (student_dict['course'],)).fetchone()
+    if course_row:
+        student_dict['course_name'] = course_row['course_name']
+        student_dict['total_semesters'] = course_row['total_semesters']
+        course_id = course_row['id']
+    else:
+        student_dict['course_name'] = student_dict['course']
+        student_dict['total_semesters'] = 4
+        course_id = None
+
+    # Fetch curriculum subjects for this course & semester
+    enrolled_subjects = []
+    if course_id:
+        curr_rows = conn.execute('''
+            SELECT cs.*, u.name as teacher_name, u.username as teacher_username
+            FROM course_subjects cs
+            LEFT JOIN users u ON cs.teacher_id = u.id
+            WHERE cs.course_id = ? AND cs.semester = ?
+            ORDER BY cs.subject_code ASC
+        ''', (course_id, student_dict['semester'])).fetchall()
+
+        # Fetch student marks for mapping
+        mark_rows = conn.execute('SELECT subject_name, marks, subject_code FROM subjects WHERE student_id = ?', (student_id,)).fetchall()
+        mark_map_by_code = {r['subject_code'].upper(): r['marks'] for r in mark_rows if r['subject_code']}
+        mark_map_by_name = {r['subject_name'].strip().lower(): r['marks'] for r in mark_rows if r['subject_name']}
+
+        for cr in curr_rows:
+            c_dict = dict(cr)
+            s_code = (c_dict['subject_code'] or '').strip().upper()
+            s_name = (c_dict['subject_name'] or '').strip().lower()
+
+            mark_val = None
+            if s_code in mark_map_by_code:
+                mark_val = mark_map_by_code[s_code]
+            elif s_name in mark_map_by_name:
+                mark_val = mark_map_by_name[s_name]
+
+            if mark_val is not None:
+                c_dict['marks'] = int(mark_val) if float(mark_val).is_integer() else round(float(mark_val), 2)
+                c_dict['grade'] = calculate_grade(float(mark_val))
+                c_dict['status'] = 'PASS' if float(mark_val) >= 40 else 'FAIL'
+                c_dict['remark'] = calculate_remark(float(mark_val))
+            else:
+                c_dict['marks'] = None
+                c_dict['grade'] = 'N/A'
+                c_dict['status'] = 'Pending'
+                c_dict['remark'] = 'Not Evaluated'
+
+            enrolled_subjects.append(c_dict)
+
+    # Fallback to existing student subjects if no curriculum subjects defined yet
+    if not enrolled_subjects:
+        existing_subs = conn.execute('SELECT * FROM subjects WHERE student_id = ?', (student_id,)).fetchall()
+        for idx, es in enumerate(existing_subs, 1):
+            mark_val = float(es['marks'])
+            enrolled_subjects.append({
+                'id': es['id'],
+                'subject_code': es['subject_code'] or f'SUB{idx:02d}',
+                'subject_name': es['subject_name'],
+                'teacher_name': 'Assigned Faculty',
+                'marks': int(mark_val) if mark_val.is_integer() else round(mark_val, 2),
+                'grade': calculate_grade(mark_val),
+                'status': 'PASS' if mark_val >= 40 else 'FAIL',
+                'remark': calculate_remark(mark_val)
+            })
+
+    student_dict['enrolled_subjects'] = enrolled_subjects
+    conn.close()
+    return student_dict
+
 # -------------------------------------------------------------
 # Authentication Routes (Login, Register, Setup Admin, Logout)
 # -------------------------------------------------------------
@@ -446,13 +679,28 @@ def register():
                 ''', (student_form['name'], student_form['roll_number'], student_form['course'], student_form['semester'], student_form['academic_year']))
                 student_id = cur.lastrowid
 
-                # Initialize default subjects for grading
-                default_subs = ['Python', 'Mathematics', 'DBMS']
-                for sub_name in default_subs:
-                    cur.execute('''
-                        INSERT INTO subjects (student_id, subject_name, marks)
-                        VALUES (?, ?, 0)
-                    ''', (student_id, sub_name))
+                # Enroll student in curriculum subjects if defined for this course & semester
+                curr_subs = conn.execute('''
+                    SELECT cs.subject_name, cs.subject_code
+                    FROM course_subjects cs
+                    JOIN courses c ON cs.course_id = c.id
+                    WHERE LOWER(TRIM(c.course_code)) = LOWER(TRIM(?)) AND cs.semester = ?
+                ''', (student_form['course'], student_form['semester'])).fetchall()
+
+                if curr_subs:
+                    for sub in curr_subs:
+                        cur.execute('''
+                            INSERT INTO subjects (student_id, subject_name, marks, subject_code)
+                            VALUES (?, ?, 0, ?)
+                        ''', (student_id, sub['subject_name'], sub['subject_code']))
+                else:
+                    # Fallback default subjects for grading
+                    default_subs = ['Python', 'Mathematics', 'DBMS']
+                    for sub_name in default_subs:
+                        cur.execute('''
+                            INSERT INTO subjects (student_id, subject_name, marks)
+                            VALUES (?, ?, 0)
+                        ''', (student_id, sub_name))
 
                 student_hash = generate_password_hash(password)
                 cur.execute('''
@@ -465,7 +713,10 @@ def register():
                 flash("Student account created successfully! Please log in.", "success")
                 return redirect(url_for('login'))
 
-    return render_template('register.html', error=error, student=student_form)
+    conn = get_db_connection()
+    courses = conn.execute('SELECT * FROM courses ORDER BY course_code ASC').fetchall()
+    conn.close()
+    return render_template('register.html', error=error, student=student_form, courses=courses)
 
 @app.route('/setup-admin', methods=['GET', 'POST'])
 def setup_admin():
@@ -548,6 +799,8 @@ def admin_dashboard():
 
     conn = get_db_connection()
     total_teachers = conn.execute("SELECT COUNT(*) as cnt FROM users WHERE role = 'TEACHER'").fetchone()['cnt']
+    total_courses = conn.execute("SELECT COUNT(*) as cnt FROM courses").fetchone()['cnt']
+    total_subjects = conn.execute("SELECT COUNT(*) as cnt FROM course_subjects").fetchone()['cnt']
     conn.close()
 
     return render_template(
@@ -558,7 +811,9 @@ def admin_dashboard():
         lowest_student=lowest_student,
         passed_students=passed_students,
         failed_students=failed_students,
-        total_teachers=total_teachers
+        total_teachers=total_teachers,
+        total_courses=total_courses,
+        total_subjects=total_subjects
     )
 
 @app.route('/admin/teachers', methods=['GET', 'POST'])
@@ -595,9 +850,402 @@ def admin_teachers():
                 return redirect(url_for('admin_teachers'))
 
     teachers = conn.execute("SELECT * FROM users WHERE role = 'TEACHER' ORDER BY id DESC").fetchall()
-    courses = [r['course'] for r in conn.execute('SELECT DISTINCT course FROM students').fetchall() if r['course']]
+    courses = [r['course_code'] for r in conn.execute('SELECT course_code FROM courses ORDER BY course_code ASC').fetchall()]
+    if not courses:
+        courses = [r['course'] for r in conn.execute('SELECT DISTINCT course FROM students').fetchall() if r['course']]
     conn.close()
     return render_template('admin_teachers.html', teachers=teachers, courses=courses, error=error)
+
+# -------------------------------------------------------------
+# Version 2B: Academic Management Routes (Admin)
+# -------------------------------------------------------------
+@app.route('/admin/courses', methods=['GET', 'POST'])
+@admin_required
+def admin_courses():
+    """Course Management: Add and view all academic courses."""
+    conn = get_db_connection()
+    error = None
+
+    if request.method == 'POST':
+        course_code = request.form.get('course_code', '').strip().upper()
+        course_name = request.form.get('course_name', '').strip()
+        total_sems_raw = request.form.get('total_semesters', '4').strip()
+        description = request.form.get('description', '').strip()
+
+        if not course_code or not course_name:
+            error = "Course Code and Course Name are required."
+        else:
+            try:
+                total_sems = int(total_sems_raw)
+                if not (1 <= total_sems <= 12):
+                    error = "Total semesters must be between 1 and 12."
+            except ValueError:
+                error = "Total semesters must be a valid number."
+
+            if not error:
+                existing = conn.execute('SELECT 1 FROM courses WHERE UPPER(course_code) = ?', (course_code,)).fetchone()
+                if existing:
+                    error = f"Course code '{course_code}' already exists."
+                else:
+                    cur = conn.cursor()
+                    cur.execute('''
+                        INSERT INTO courses (course_code, course_name, total_semesters, description)
+                        VALUES (?, ?, ?, ?)
+                    ''', (course_code, course_name, total_sems, description))
+                    course_id = cur.lastrowid
+                    for s_num in range(1, total_sems + 1):
+                        cur.execute('''
+                            INSERT INTO semesters (course_id, semester_number, semester_name)
+                            VALUES (?, ?, ?)
+                        ''', (course_id, s_num, f'Semester {s_num}'))
+                    conn.commit()
+                    flash(f"Course '{course_code} - {course_name}' added successfully!", "success")
+                    conn.close()
+                    return redirect(url_for('admin_courses'))
+
+    courses = get_all_courses_with_stats()
+    conn.close()
+    return render_template('admin_courses.html', courses=courses, error=error)
+
+@app.route('/admin/course/edit/<int:course_id>', methods=['GET', 'POST'])
+@admin_required
+def admin_course_edit(course_id):
+    """Edit existing course details."""
+    conn = get_db_connection()
+    course = conn.execute('SELECT * FROM courses WHERE id = ?', (course_id,)).fetchone()
+    if not course:
+        conn.close()
+        flash("Course not found.", "danger")
+        return redirect(url_for('admin_courses'))
+
+    error = None
+    if request.method == 'POST':
+        course_code = request.form.get('course_code', '').strip().upper()
+        course_name = request.form.get('course_name', '').strip()
+        total_sems_raw = request.form.get('total_semesters', '4').strip()
+        description = request.form.get('description', '').strip()
+
+        if not course_code or not course_name:
+            error = "Course Code and Course Name are required."
+        else:
+            try:
+                total_sems = int(total_sems_raw)
+                if not (1 <= total_sems <= 12):
+                    error = "Total semesters must be between 1 and 12."
+            except ValueError:
+                error = "Total semesters must be a valid number."
+
+            if not error:
+                existing = conn.execute('SELECT 1 FROM courses WHERE UPPER(course_code) = ? AND id != ?', (course_code, course_id)).fetchone()
+                if existing:
+                    error = f"Course code '{course_code}' is already used by another course."
+                else:
+                    old_code = course['course_code']
+                    cur = conn.cursor()
+                    cur.execute('''
+                        UPDATE courses
+                        SET course_code = ?, course_name = ?, total_semesters = ?, description = ?
+                        WHERE id = ?
+                    ''', (course_code, course_name, total_sems, description, course_id))
+
+                    if old_code != course_code:
+                        cur.execute('UPDATE students SET course = ? WHERE course = ?', (course_code, old_code))
+                        cur.execute('UPDATE users SET assigned_course = ? WHERE assigned_course = ?', (course_code, old_code))
+
+                    current_sems = conn.execute('SELECT semester_number FROM semesters WHERE course_id = ?', (course_id,)).fetchall()
+                    existing_nums = {r['semester_number'] for r in current_sems}
+                    for s_num in range(1, total_sems + 1):
+                        if s_num not in existing_nums:
+                            cur.execute('''
+                                INSERT INTO semesters (course_id, semester_number, semester_name)
+                                VALUES (?, ?, ?)
+                            ''', (course_id, s_num, f'Semester {s_num}'))
+
+                    conn.commit()
+                    flash(f"Course '{course_code}' updated successfully!", "success")
+                    conn.close()
+                    return redirect(url_for('admin_courses'))
+
+    conn.close()
+    return render_template('admin_course_edit.html', course=course, error=error)
+
+@app.route('/admin/course/delete/<int:course_id>', methods=['POST'])
+@admin_required
+def admin_course_delete(course_id):
+    """Safely delete course if no students are enrolled."""
+    conn = get_db_connection()
+    course = conn.execute('SELECT * FROM courses WHERE id = ?', (course_id,)).fetchone()
+    if not course:
+        conn.close()
+        flash("Course not found.", "danger")
+        return redirect(url_for('admin_courses'))
+
+    enrolled = conn.execute('SELECT COUNT(*) as cnt FROM students WHERE LOWER(TRIM(course)) = LOWER(TRIM(?))', (course['course_code'],)).fetchone()['cnt']
+    if enrolled > 0:
+        conn.close()
+        flash(f"Cannot delete course '{course['course_code']}' because {enrolled} student(s) are currently enrolled. Reassign or delete those students first.", "danger")
+        return redirect(url_for('admin_courses'))
+
+    cur = conn.cursor()
+    cur.execute('DELETE FROM course_subjects WHERE course_id = ?', (course_id,))
+    cur.execute('DELETE FROM semesters WHERE course_id = ?', (course_id,))
+    cur.execute('DELETE FROM courses WHERE id = ?', (course_id,))
+    conn.commit()
+    conn.close()
+    flash(f"Course '{course['course_code']}' and its curriculum deleted successfully.", "info")
+    return redirect(url_for('admin_courses'))
+
+@app.route('/admin/course/<int:course_id>/students')
+@admin_required
+def admin_course_students(course_id):
+    """Display course-wise student list."""
+    conn = get_db_connection()
+    course = conn.execute('SELECT * FROM courses WHERE id = ?', (course_id,)).fetchone()
+    conn.close()
+    if not course:
+        flash("Course not found.", "danger")
+        return redirect(url_for('admin_courses'))
+
+    all_students = fetch_all_students_analyzed()
+    course_students = [s for s in all_students if s['course'].strip().lower() == course['course_code'].strip().lower()]
+    return render_template('admin_course_students.html', course=course, students=course_students)
+
+@app.route('/admin/semesters', methods=['GET', 'POST'])
+@admin_required
+def admin_semesters():
+    """Semester Management: View and manage semesters per course."""
+    conn = get_db_connection()
+    error = None
+
+    if request.method == 'POST':
+        course_id_raw = request.form.get('course_id', '').strip()
+        sem_num_raw = request.form.get('semester_number', '').strip()
+        sem_name = request.form.get('semester_name', '').strip()
+
+        if not course_id_raw or not sem_num_raw:
+            error = "Course and Semester Number are required."
+        else:
+            try:
+                course_id = int(course_id_raw)
+                sem_num = int(sem_num_raw)
+                if not (1 <= sem_num <= 12):
+                    error = "Semester number must be between 1 and 12."
+            except ValueError:
+                error = "Invalid course or semester number."
+
+            if not error:
+                existing = conn.execute('SELECT 1 FROM semesters WHERE course_id = ? AND semester_number = ?', (course_id, sem_num)).fetchone()
+                if existing:
+                    error = f"Semester {sem_num} already exists for this course."
+                else:
+                    cur = conn.cursor()
+                    cur.execute('''
+                        INSERT INTO semesters (course_id, semester_number, semester_name)
+                        VALUES (?, ?, ?)
+                    ''', (course_id, sem_num, sem_name or f'Semester {sem_num}'))
+                    conn.commit()
+                    flash(f"Semester {sem_num} added successfully!", "success")
+                    conn.close()
+                    return redirect(url_for('admin_semesters'))
+
+    courses = [dict(c) for c in conn.execute('SELECT * FROM courses ORDER BY course_code ASC').fetchall()]
+    all_students = fetch_all_students_analyzed()
+
+    semester_rows = []
+    sem_db_rows = conn.execute('''
+        SELECT s.*, c.course_code, c.course_name
+        FROM semesters s
+        JOIN courses c ON s.course_id = c.id
+        ORDER BY c.course_code ASC, s.semester_number ASC
+    ''').fetchall()
+
+    for s in sem_db_rows:
+        s_dict = dict(s)
+        c_code = s_dict['course_code'].strip().lower()
+        s_num = str(s_dict['semester_number'])
+        s_dict['student_count'] = sum(1 for st in all_students if st['course'].strip().lower() == c_code and str(st['semester']).strip() == s_num)
+        s_dict['subject_count'] = conn.execute('SELECT COUNT(*) as cnt FROM course_subjects WHERE course_id = ? AND semester = ?', (s_dict['course_id'], s_dict['semester_number'])).fetchone()['cnt']
+        semester_rows.append(s_dict)
+
+    conn.close()
+    return render_template('admin_semesters.html', courses=courses, semesters=semester_rows, error=error)
+
+@app.route('/admin/subjects', methods=['GET', 'POST'])
+@admin_required
+def admin_subjects():
+    """Subject Management: Add, view, and organize subjects semester-wise with duplicate prevention."""
+    conn = get_db_connection()
+    error = None
+
+    if request.method == 'POST':
+        subject_code = request.form.get('subject_code', '').strip().upper()
+        subject_name = request.form.get('subject_name', '').strip()
+        course_id_raw = request.form.get('course_id', '').strip()
+        semester_raw = request.form.get('semester', '').strip()
+        teacher_id_raw = request.form.get('teacher_id', '').strip()
+
+        if not subject_code or not subject_name or not course_id_raw or not semester_raw:
+            error = "Subject Code, Subject Name, Course, and Semester are all required."
+        else:
+            try:
+                course_id = int(course_id_raw)
+                semester = int(semester_raw)
+                teacher_id = int(teacher_id_raw) if teacher_id_raw else None
+            except ValueError:
+                error = "Invalid course, semester, or teacher selected."
+
+            if not error:
+                # Prevent duplicate subject codes within the same course and semester!
+                duplicate = conn.execute('''
+                    SELECT 1 FROM course_subjects
+                    WHERE course_id = ? AND semester = ? AND UPPER(subject_code) = ?
+                ''', (course_id, semester, subject_code)).fetchone()
+
+                if duplicate:
+                    error = f"Duplicate subject code: Subject code '{subject_code}' already exists in Semester {semester} for this course."
+                else:
+                    cur = conn.cursor()
+                    cur.execute('''
+                        INSERT INTO course_subjects (subject_code, subject_name, course_id, semester, teacher_id)
+                        VALUES (?, ?, ?, ?, ?)
+                    ''', (subject_code, subject_name, course_id, semester, teacher_id))
+                    conn.commit()
+                    flash(f"Subject '{subject_code} - {subject_name}' created successfully!", "success")
+                    conn.close()
+                    return redirect(url_for('admin_subjects'))
+
+    subjects = conn.execute('''
+        SELECT cs.*, c.course_code, c.course_name, u.name as teacher_name, u.username as teacher_username
+        FROM course_subjects cs
+        JOIN courses c ON cs.course_id = c.id
+        LEFT JOIN users u ON cs.teacher_id = u.id
+        ORDER BY c.course_code ASC, cs.semester ASC, cs.subject_code ASC
+    ''').fetchall()
+
+    courses = conn.execute('SELECT * FROM courses ORDER BY course_code ASC').fetchall()
+    teachers = conn.execute("SELECT * FROM users WHERE role = 'TEACHER' ORDER BY name ASC").fetchall()
+    conn.close()
+
+    return render_template('admin_subjects.html', subjects=subjects, courses=courses, teachers=teachers, error=error)
+
+@app.route('/admin/subject/edit/<int:subject_id>', methods=['GET', 'POST'])
+@admin_required
+def admin_subject_edit(subject_id):
+    """Edit curriculum subject details and teacher assignment."""
+    conn = get_db_connection()
+    subject = conn.execute('SELECT * FROM course_subjects WHERE id = ?', (subject_id,)).fetchone()
+    if not subject:
+        conn.close()
+        flash("Subject not found.", "danger")
+        return redirect(url_for('admin_subjects'))
+
+    error = None
+    if request.method == 'POST':
+        subject_code = request.form.get('subject_code', '').strip().upper()
+        subject_name = request.form.get('subject_name', '').strip()
+        course_id_raw = request.form.get('course_id', '').strip()
+        semester_raw = request.form.get('semester', '').strip()
+        teacher_id_raw = request.form.get('teacher_id', '').strip()
+
+        if not subject_code or not subject_name or not course_id_raw or not semester_raw:
+            error = "Subject Code, Subject Name, Course, and Semester are required."
+        else:
+            try:
+                course_id = int(course_id_raw)
+                semester = int(semester_raw)
+                teacher_id = int(teacher_id_raw) if teacher_id_raw else None
+            except ValueError:
+                error = "Invalid course, semester, or teacher."
+
+            if not error:
+                # Prevent duplicate subject codes within the same course and semester (excluding self)
+                duplicate = conn.execute('''
+                    SELECT 1 FROM course_subjects
+                    WHERE course_id = ? AND semester = ? AND UPPER(subject_code) = ? AND id != ?
+                ''', (course_id, semester, subject_code, subject_id)).fetchone()
+
+                if duplicate:
+                    error = f"Subject code '{subject_code}' already exists in Semester {semester} for this course."
+                else:
+                    cur = conn.cursor()
+                    cur.execute('''
+                        UPDATE course_subjects
+                        SET subject_code = ?, subject_name = ?, course_id = ?, semester = ?, teacher_id = ?
+                        WHERE id = ?
+                    ''', (subject_code, subject_name, course_id, semester, teacher_id, subject_id))
+                    conn.commit()
+                    flash(f"Subject '{subject_code}' updated successfully!", "success")
+                    conn.close()
+                    return redirect(url_for('admin_subjects'))
+
+    courses = conn.execute('SELECT * FROM courses ORDER BY course_code ASC').fetchall()
+    teachers = conn.execute("SELECT * FROM users WHERE role = 'TEACHER' ORDER BY name ASC").fetchall()
+    conn.close()
+    return render_template('admin_subject_edit.html', subject=subject, courses=courses, teachers=teachers, error=error)
+
+@app.route('/admin/subject/delete/<int:subject_id>', methods=['POST'])
+@admin_required
+def admin_subject_delete(subject_id):
+    """Delete a curriculum subject."""
+    conn = get_db_connection()
+    sub = conn.execute('SELECT * FROM course_subjects WHERE id = ?', (subject_id,)).fetchone()
+    if sub:
+        conn.execute('DELETE FROM course_subjects WHERE id = ?', (subject_id,))
+        conn.commit()
+        flash(f"Subject '{sub['subject_code']} - {sub['subject_name']}' deleted.", "info")
+    conn.close()
+    return redirect(url_for('admin_subjects'))
+
+@app.route('/admin/assign-teachers', methods=['GET', 'POST'])
+@admin_required
+def admin_assign_teachers():
+    """Assign teachers to specific subjects."""
+    conn = get_db_connection()
+
+    if request.method == 'POST':
+        subject_id = request.form.get('subject_id')
+        teacher_id_raw = request.form.get('teacher_id')
+        teacher_id = int(teacher_id_raw) if teacher_id_raw else None
+
+        cur = conn.cursor()
+        cur.execute('UPDATE course_subjects SET teacher_id = ? WHERE id = ?', (teacher_id, subject_id))
+        conn.commit()
+        flash("Faculty assignment updated successfully!", "success")
+        conn.close()
+        return redirect(url_for('admin_assign_teachers'))
+
+    subjects = conn.execute('''
+        SELECT cs.*, c.course_code, c.course_name, u.name as teacher_name, u.username as teacher_username
+        FROM course_subjects cs
+        JOIN courses c ON cs.course_id = c.id
+        LEFT JOIN users u ON cs.teacher_id = u.id
+        ORDER BY c.course_code ASC, cs.semester ASC, cs.subject_code ASC
+    ''').fetchall()
+
+    teachers = conn.execute("SELECT * FROM users WHERE role = 'TEACHER' ORDER BY name ASC").fetchall()
+    conn.close()
+    return render_template('admin_assign_teachers.html', subjects=subjects, teachers=teachers)
+
+@app.route('/admin/academic-view')
+@admin_required
+def admin_academic_view():
+    """Filter students by Course and Semester."""
+    course_filter = request.args.get('course', '').strip()
+    semester_filter = request.args.get('semester', '').strip()
+
+    all_students = fetch_all_students_analyzed()
+    filtered = all_students
+
+    if course_filter:
+        filtered = [s for s in filtered if s['course'].strip().lower() == course_filter.lower()]
+    if semester_filter:
+        filtered = [s for s in filtered if str(s['semester']).strip() == semester_filter]
+
+    conn = get_db_connection()
+    courses = conn.execute('SELECT * FROM courses ORDER BY course_code ASC').fetchall()
+    conn.close()
+
+    return render_template('admin_academic_view.html', students=filtered, courses=courses, selected_course=course_filter, selected_semester=semester_filter)
 
 @app.route('/admin/student/add', methods=['GET', 'POST'])
 @admin_required
@@ -701,7 +1349,10 @@ def admin_student_add():
                 result = analyze_student_data(student_info, raw_subjects_to_save)
                 flash(f"Student '{student_form['name']}' saved successfully! Login account created (Username: {student_form['roll_number']}, Password: student123)", "success")
 
-    return render_template('student_add.html', result=result, error=error, subjects=subjects_input, student=student_form)
+    conn = get_db_connection()
+    courses = conn.execute('SELECT * FROM courses ORDER BY course_code ASC').fetchall()
+    conn.close()
+    return render_template('student_add.html', result=result, error=error, subjects=subjects_input, student=student_form, courses=courses)
 
 @app.route('/admin/student/edit/<int:student_id>', methods=['GET', 'POST'])
 @admin_required
@@ -774,7 +1425,10 @@ def admin_student_edit(student_id):
                 flash("Student record updated successfully.", "success")
                 return redirect(url_for('student_detail', student_id=student_id))
 
-    return render_template('student_edit.html', student=student, error=error)
+    conn = get_db_connection()
+    courses = conn.execute('SELECT * FROM courses ORDER BY course_code ASC').fetchall()
+    conn.close()
+    return render_template('student_edit.html', student=student, error=error, courses=courses)
 
 @app.route('/admin/student/delete/<int:student_id>', methods=['POST'])
 @admin_required
@@ -917,10 +1571,61 @@ def export_csv():
 @app.route('/teacher/dashboard')
 @teacher_required
 def teacher_dashboard():
-    """Teacher Dashboard: view assigned students and analytics."""
+    """Teacher Dashboard: view assigned subjects, students in each subject, and manage marks."""
+    user_id = session.get('user_id')
     assigned_course = session.get('assigned_course', '')
-    all_students = fetch_all_students_analyzed()
+    conn = get_db_connection()
 
+    # Query subjects assigned specifically to this teacher
+    assigned_subjects_rows = conn.execute('''
+        SELECT cs.*, c.course_code, c.course_name
+        FROM course_subjects cs
+        JOIN courses c ON cs.course_id = c.id
+        WHERE cs.teacher_id = ?
+        ORDER BY c.course_code ASC, cs.semester ASC, cs.subject_code ASC
+    ''', (user_id,)).fetchall()
+
+    assigned_subjects = [dict(r) for r in assigned_subjects_rows]
+
+    # If teacher has assigned_course from Version 2A and no subject assignments yet, include course subjects
+    if not assigned_subjects and assigned_course:
+        if assigned_course.upper() == 'ALL':
+            course_sub_rows = conn.execute('''
+                SELECT cs.*, c.course_code, c.course_name
+                FROM course_subjects cs
+                JOIN courses c ON cs.course_id = c.id
+                ORDER BY c.course_code ASC, cs.semester ASC, cs.subject_code ASC
+            ''').fetchall()
+        else:
+            course_sub_rows = conn.execute('''
+                SELECT cs.*, c.course_code, c.course_name
+                FROM course_subjects cs
+                JOIN courses c ON cs.course_id = c.id
+                WHERE LOWER(TRIM(c.course_code)) = LOWER(TRIM(?))
+                ORDER BY cs.semester ASC, cs.subject_code ASC
+            ''', (assigned_course,)).fetchall()
+        assigned_subjects = [dict(r) for r in course_sub_rows]
+
+    # For each assigned subject, calculate enrolled student count and subject average mark
+    for sub in assigned_subjects:
+        c_code = sub['course_code'].strip().lower()
+        s_num = str(sub['semester']).strip()
+        sub['student_count'] = conn.execute(
+            'SELECT COUNT(*) as cnt FROM students WHERE LOWER(TRIM(course)) = ? AND TRIM(semester) = ?',
+            (c_code, s_num)
+        ).fetchone()['cnt']
+
+        avg_row = conn.execute('''
+            SELECT AVG(sub.marks) as avg_mark
+            FROM subjects sub
+            JOIN students s ON sub.student_id = s.id
+            WHERE LOWER(TRIM(s.course)) = ? AND TRIM(s.semester) = ?
+              AND (sub.subject_code = ? OR LOWER(TRIM(sub.subject_name)) = LOWER(TRIM(?)))
+        ''', (c_code, s_num, sub['subject_code'], sub['subject_name'])).fetchone()
+        sub['avg_mark'] = round(avg_row['avg_mark'], 1) if (avg_row and avg_row['avg_mark'] is not None) else 'N/A'
+
+    # Compute course-level assigned students for the teacher
+    all_students = fetch_all_students_analyzed()
     if assigned_course and assigned_course.upper() != 'ALL':
         assigned_students = [s for s in all_students if s['course'].strip().lower() == assigned_course.strip().lower()]
     else:
@@ -942,9 +1647,12 @@ def teacher_dashboard():
         failed_students = 0
         pass_pct = 0
 
+    conn.close()
+
     return render_template(
         'teacher_dashboard.html',
         assigned_course=assigned_course,
+        assigned_subjects=assigned_subjects,
         students=assigned_students,
         total_students=total_students,
         class_avg=class_avg,
@@ -954,6 +1662,91 @@ def teacher_dashboard():
         failed_students=failed_students,
         pass_pct=pass_pct
     )
+
+@app.route('/teacher/subject/<int:subject_id>/marks', methods=['GET', 'POST'])
+@teacher_required
+def teacher_subject_marks(subject_id):
+    """
+    Teachers manage marks strictly for their assigned subjects.
+    Displays all students enrolled in that subject's course & semester.
+    """
+    conn = get_db_connection()
+    subject = conn.execute('''
+        SELECT cs.*, c.course_code, c.course_name
+        FROM course_subjects cs
+        JOIN courses c ON cs.course_id = c.id
+        WHERE cs.id = ?
+    ''', (subject_id,)).fetchone()
+
+    if not subject:
+        conn.close()
+        flash("Subject not found.", "danger")
+        return redirect(url_for('teacher_dashboard'))
+
+    # Security check: verify this teacher is assigned to this subject (or is admin or has course match)
+    user_id = session.get('user_id')
+    assigned_course = session.get('assigned_course', '')
+    is_assigned = (subject['teacher_id'] == user_id)
+    if not is_assigned and assigned_course and assigned_course.upper() != 'ALL':
+        is_assigned = (assigned_course.strip().lower() == subject['course_code'].strip().lower())
+    if session.get('role') == 'ADMIN':
+        is_assigned = True
+
+    if not is_assigned:
+        conn.close()
+        flash("Access denied. You are only authorized to manage marks for your assigned subjects.", "danger")
+        return redirect(url_for('teacher_dashboard'))
+
+    error = None
+    if request.method == 'POST':
+        student_ids = request.form.getlist('student_id')
+        marks_list = request.form.getlist('marks')
+
+        cur = conn.cursor()
+        updated_count = 0
+        for sid_raw, m_raw in zip(student_ids, marks_list):
+            m_str = m_raw.strip()
+            if m_str != '':
+                try:
+                    mark_val = float(m_str)
+                    if 0 <= mark_val <= 100:
+                        sid = int(sid_raw)
+                        existing = cur.execute('''
+                            SELECT id FROM subjects
+                            WHERE student_id = ? AND (subject_code = ? OR LOWER(TRIM(subject_name)) = LOWER(TRIM(?)))
+                        ''', (sid, subject['subject_code'], subject['subject_name'])).fetchone()
+
+                        if existing:
+                            cur.execute('UPDATE subjects SET marks = ?, subject_code = ?, subject_name = ? WHERE id = ?',
+                                        (mark_val, subject['subject_code'], subject['subject_name'], existing['id']))
+                        else:
+                            cur.execute('''
+                                INSERT INTO subjects (student_id, subject_name, marks, subject_code)
+                                VALUES (?, ?, ?, ?)
+                            ''', (sid, subject['subject_name'], mark_val, subject['subject_code']))
+                        updated_count += 1
+                except ValueError:
+                    pass
+
+        conn.commit()
+        flash(f"Marks for '{subject['subject_code']} - {subject['subject_name']}' updated successfully ({updated_count} student record(s) processed)!", "success")
+        conn.close()
+        return redirect(url_for('teacher_subject_marks', subject_id=subject_id))
+
+    # Fetch students enrolled in this course & semester
+    c_code = subject['course_code']
+    sem_val = str(subject['semester'])
+
+    student_rows = conn.execute('''
+        SELECT s.*, sub.marks as current_marks
+        FROM students s
+        LEFT JOIN subjects sub ON sub.student_id = s.id AND (sub.subject_code = ? OR LOWER(TRIM(sub.subject_name)) = LOWER(TRIM(?)))
+        WHERE LOWER(TRIM(s.course)) = LOWER(TRIM(?)) AND TRIM(s.semester) = ?
+        ORDER BY s.roll_number ASC
+    ''', (subject['subject_code'], subject['subject_name'], c_code, sem_val)).fetchall()
+
+    conn.close()
+    return render_template('teacher_subject_marks.html', subject=subject, students=student_rows, error=error)
 
 @app.route('/teacher/student/marks/<int:student_id>', methods=['GET', 'POST'])
 @teacher_required
@@ -1029,7 +1822,25 @@ def student_dashboard():
         flash("Student profile not found.", "danger")
         return redirect(url_for('logout'))
 
-    return render_template('student_dashboard.html', student=student)
+    profile = get_student_academic_profile_data(student_id)
+    return render_template('student_dashboard.html', student=student, profile=profile)
+
+@app.route('/student/academic-profile')
+@login_required
+def student_academic_profile():
+    """Student Academic Profile: display Name, Roll No, Course, Semester, Academic Year, and Enrolled Subjects."""
+    if session.get('role') != 'STUDENT':
+        flash("Academic profile is available for students.", "info")
+        return redirect(url_for('index'))
+
+    student_id = session.get('student_id')
+    profile = get_student_academic_profile_data(student_id)
+    if not profile:
+        flash("Student profile not found.", "danger")
+        return redirect(url_for('logout'))
+
+    analyzed_student = fetch_single_student_analyzed(student_id)
+    return render_template('student_academic_profile.html', profile=profile, student=analyzed_student)
 
 @app.route('/student/my-result')
 @login_required

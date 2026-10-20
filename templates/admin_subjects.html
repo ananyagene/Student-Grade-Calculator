@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Subject Management - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="full-page-container">
+    <div class="page-header">
+        <div>
+            <h2>📖 Curriculum Subject Management</h2>
+            <p class="subtitle">Define course subjects with unique codes, semester mappings, and faculty assignments.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('admin_assign_teachers') }}" class="btn-primary" style="background-color: #27ae60;">🧑‍🏫 Assign Faculty</a>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">⬅️ Admin Dashboard</a>
+        </div>
+    </div>
+
+    {% if error %}
+        <div class="error-box">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <!-- Add Subject Form Card -->
+    <div class="card-box" style="margin-bottom: 25px;">
+        <h4>➕ Add New Subject to Curriculum</h4>
+        <form method="POST" action="{{ url_for('admin_subjects') }}" class="entry-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="subject_code">Subject Code *</label>
+                    <input 
+                        type="text" 
+                        id="subject_code" 
+                        name="subject_code" 
+                        placeholder="e.g. MCA101, BCA201" 
+                        required
+                    >
+                    <small style="color: #7f8c8d; font-size: 11px;">Must be unique within the same course & semester.</small>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="subject_name">Subject Name *</label>
+                    <input 
+                        type="text" 
+                        id="subject_name" 
+                        name="subject_name" 
+                        placeholder="e.g. Advanced Python Programming" 
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="course_id">Course / Program *</label>
+                    <select id="course_id" name="course_id" required>
+                        <option value="">-- Select Course --</option>
+                        {% for c in courses %}
+                            <option value="{{ c.id }}">{{ c.course_code }} - {{ c.course_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="semester">Semester Number *</label>
+                    <input 
+                        type="number" 
+                        id="semester" 
+                        name="semester" 
+                        value="1" 
+                        min="1" 
+                        max="12" 
+                        required
+                    >
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="teacher_id">Assigned Faculty / Teacher (Optional)</label>
+                    <select id="teacher_id" name="teacher_id">
+                        <option value="">-- Unassigned (Assign Later) --</option>
+                        {% for t in teachers %}
+                            <option value="{{ t.id }}">{{ t.name }} ({{ t.username }}) - {{ t.assigned_course or 'All Courses' }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" style="margin-top: 10px;">Save Subject</button>
+        </form>
+    </div>
+
+    <!-- Curriculum Subjects Directory (Semester-wise) -->
+    <div class="card-box">
+        <h4>Semester-Wise Subjects Directory ({{ subjects|length }})</h4>
+        {% if subjects and subjects|length > 0 %}
+            <div class="table-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Course</th>
+                            <th>Semester</th>
+                            <th>Assigned Faculty</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in subjects %}
+                            <tr>
+                                <td><b><code>{{ s.subject_code }}</code></b></td>
+                                <td><b>{{ s.subject_name }}</b></td>
+                                <td>
+                                    <span class="status-badge" style="background-color: #2980b9; color: white;">
+                                        {{ s.course_code }}
+                                    </span>
+                                </td>
+                                <td>Semester {{ s.semester }}</td>
+                                <td>
+                                    {% if s.teacher_name %}
+                                        <span class="status-badge" style="background-color: #e67e22; color: white;">
+                                            🧑‍🏫 {{ s.teacher_name }}
+                                        </span>
+                                    {% else %}
+                                        <span style="color: #95a5a6; font-style: italic;">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                                <td class="action-cell">
+                                    <a href="{{ url_for('admin_subject_edit', subject_id=s.id) }}" class="btn-action-edit" title="Edit Subject">✏️ Edit</a>
+                                    <form method="POST" action="{{ url_for('admin_subject_delete', subject_id=s.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete subject {{ s.subject_code }}?');">
+                                        <button type="submit" class="btn-action-delete" title="Delete Subject">🗑️ Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📖</div>
+                <h3>No Subjects Added</h3>
+                <p>Add curriculum subjects using the form above.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

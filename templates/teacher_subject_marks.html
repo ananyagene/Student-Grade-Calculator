@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Marks - {{ subject.subject_code }}{% endblock %}
+
+{% block content %}
+<div class="full-page-container" style="max-width: 860px;">
+    <div class="page-header">
+        <div>
+            <h2>📝 Subject Mark Management: {{ subject.subject_code }}</h2>
+            <p class="subtitle">{{ subject.subject_name }} &bull; Program: <b>{{ subject.course_code }}</b> &bull; Semester: <b>{{ subject.semester }}</b></p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('teacher_dashboard') }}" class="btn-secondary">⬅️ Teacher Dashboard</a>
+        </div>
+    </div>
+
+    {% if error %}
+        <div class="error-box">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <div class="card-box">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <h4>Enrolled Students in this Subject ({{ students|length }})</h4>
+            <span style="font-size: 13px; color: #7f8c8d;">Enter marks (0–100) and click save to recalculate results.</span>
+        </div>
+
+        {% if students and students|length > 0 %}
+            <form method="POST" action="{{ url_for('teacher_subject_marks', subject_id=subject.id) }}">
+                <div class="table-card" style="margin-bottom: 20px;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Roll No.</th>
+                                <th>Student Name</th>
+                                <th>Course & Sem</th>
+                                <th>Current Marks</th>
+                                <th>Enter / Update Marks (0–100)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in students %}
+                                <tr>
+                                    <td><b>{{ s.roll_number }}</b></td>
+                                    <td>{{ s.name }}</td>
+                                    <td>{{ s.course }} (Sem {{ s.semester }})</td>
+                                    <td>
+                                        {% if s.current_marks is not none %}
+                                            <b>{{ s.current_marks }} / 100</b>
+                                        {% else %}
+                                            <span style="color: #95a5a6; font-style: italic;">Not entered</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <input type="hidden" name="student_id" value="{{ s.id }}">
+                                        <input 
+                                            type="number" 
+                                            name="marks" 
+                                            value="{{ s.current_marks if s.current_marks is not none else '' }}" 
+                                            placeholder="Marks (0-100)" 
+                                            min="0" 
+                                            max="100" 
+                                            step="any"
+                                            style="width: 130px; padding: 6px 10px; border: 1px solid #ccd1d9; border-radius: 4px; font-size: 14px; font-weight: bold;"
+                                        >
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button type="submit" class="btn-calculate" style="max-width: 250px;">💾 Save Marks & Recalculate</button>
+                    <a href="{{ url_for('teacher_dashboard') }}" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">👥</div>
+                <h3>No Students Enrolled in this Course & Semester</h3>
+                <p>No students match program <b>{{ subject.course_code }}</b> and <b>Semester {{ subject.semester }}</b>.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

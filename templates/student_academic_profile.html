@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Academic Profile - {{ profile.name }}{% endblock %}
+
+{% block content %}
+<div class="calculator-container" style="max-width: 820px;">
+    <div class="page-header">
+        <div>
+            <h2>🎓 Student Academic Profile</h2>
+            <p class="subtitle">Official enrolled program, current semester status, and registered curriculum.</p>
+        </div>
+        <div class="header-actions">
+            {% if student %}
+                <a href="{{ url_for('export_pdf', student_id=student.id) }}" class="btn-export-pdf">📄 Download Official PDF</a>
+            {% endif %}
+            <a href="{{ url_for('student_dashboard') }}" class="btn-secondary">🏠 Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Student Identity & Enrollment Card -->
+    <div class="result-summary-card">
+        <div class="summary-header">
+            <h3>ACADEMIC ENROLLMENT DETAILS</h3>
+            {% if student %}
+                <span class="status-badge {{ 'status-pass' if student.status == 'PASS' else 'status-fail' }}">
+                    {{ student.status }}
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="summary-meta-grid">
+            <div><strong>Student Name:</strong> {{ profile.name }}</div>
+            <div><strong>Roll Number:</strong> {{ profile.roll_number }}</div>
+            <div><strong>Degree Program:</strong> {{ profile.course }} ({{ profile.course_name }})</div>
+            <div><strong>Current Semester:</strong> Semester {{ profile.semester }} / {{ profile.total_semesters }}</div>
+            <div><strong>Academic Year:</strong> {{ profile.academic_year }}</div>
+            <div><strong>Enrolled Subjects:</strong> {{ profile.enrolled_subjects|length }} subjects</div>
+            {% if student %}
+                <div><strong>Current Percentage:</strong> {{ student.percentage_formatted }}</div>
+                <div><strong>Current Grade:</strong> <span class="grade-badge">{{ student.grade }}</span></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Enrolled Subjects Table Card -->
+    <div class="card-box">
+        <h4>Enrolled Curriculum Subjects (Semester {{ profile.semester }})</h4>
+        <div class="table-card" style="margin-top: 12px;">
+            <table class="grades-table">
+                <thead>
+                    <tr>
+                        <th>Subject Code</th>
+                        <th>Subject Name</th>
+                        <th>Assigned Faculty</th>
+                        <th>Marks</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                        <th>Remark</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in profile.enrolled_subjects %}
+                        <tr>
+                            <td><b><code>{{ sub.subject_code }}</code></b></td>
+                            <td><b>{{ sub.subject_name }}</b></td>
+                            <td>
+                                {% if sub.teacher_name and sub.teacher_name != 'Assigned Faculty' %}
+                                    <span class="status-badge" style="background-color: #e67e22; color: white; font-size: 11px;">
+                                        🧑‍🏫 {{ sub.teacher_name }}
+                                    </span>
+                                {% else %}
+                                    <span style="color: #7f8c8d; font-size: 12px;">{{ sub.teacher_name or 'Faculty Assigned' }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.marks is not none %}
+                                    <b>{{ sub.marks }} / 100</b>
+                                {% else %}
+                                    <span style="color: #95a5a6; font-style: italic;">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.marks is not none %}
+                                    <span class="grade-badge">{{ sub.grade }}</span>
+                                {% else %}
+                                    <span style="color: #95a5a6;">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.marks is not none %}
+                                    <span class="status-badge {{ 'status-pass' if sub.status == 'PASS' else 'status-fail' }}">
+                                        {{ sub.status }}
+                                    </span>
+                                {% else %}
+                                    <span class="status-badge" style="background-color: #bdc3c7; color: white;">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.marks is not none %}
+                                    {{ sub.remark }}
+                                {% else %}
+                                    <span style="color: #95a5a6;">In Progress</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quick Action Links -->
+    <div style="display: flex; gap: 12px; margin-top: 20px;">
+        <a href="{{ url_for('student_my_result') }}" class="btn-calculate" style="text-align: center; text-decoration: none;">📄 View Full Scorecard & Analytics</a>
+        <a href="{{ url_for('student_my_performance') }}" class="btn-secondary" style="text-align: center; text-decoration: none;">📊 View Visual Performance Chart</a>
+    </div>
+</div>
+{% endblock %}

@@ -43,15 +43,21 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="course">Course / Class *</label>
+                    <label for="course">Course / Degree Program *</label>
                     <input 
                         type="text" 
                         id="course" 
                         name="course" 
-                        placeholder="e.g. MCA AI" 
+                        placeholder="e.g. MCA AI, BCA" 
                         value="{{ student.course }}"
+                        list="course_list"
                         required
                     >
+                    <datalist id="course_list">
+                        {% for c in courses %}
+                            <option value="{{ c.course_code }}">{{ c.course_code }} - {{ c.course_name }}</option>
+                        {% endfor %}
+                    </datalist>
                 </div>
 
                 <div class="form-group">

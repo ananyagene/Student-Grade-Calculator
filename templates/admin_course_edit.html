@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Course - {{ course.course_code }}{% endblock %}
+
+{% block content %}
+<div class="calculator-container" style="max-width: 650px;">
+    <div class="page-header">
+        <div>
+            <h2>✏️ Edit Course: {{ course.course_code }}</h2>
+            <p class="subtitle">Modify program details, total semesters, or description.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('admin_courses') }}" class="btn-secondary">⬅️ Cancel</a>
+        </div>
+    </div>
+
+    {% if error %}
+        <div class="error-box">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('admin_course_edit', course_id=course.id) }}" class="entry-form">
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="course_code">Course Code *</label>
+                <input 
+                    type="text" 
+                    id="course_code" 
+                    name="course_code" 
+                    value="{{ course.course_code }}" 
+                    required
+                >
+            </div>
+
+            <div class="form-group full-width">
+                <label for="course_name">Full Course / Program Name *</label>
+                <input 
+                    type="text" 
+                    id="course_name" 
+                    name="course_name" 
+                    value="{{ course.course_name }}" 
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="total_semesters">Total Semesters *</label>
+                <input 
+                    type="number" 
+                    id="total_semesters" 
+                    name="total_semesters" 
+                    value="{{ course.total_semesters }}" 
+                    min="1" 
+                    max="12" 
+                    required
+                >
+            </div>
+
+            <div class="form-group full-width">
+                <label for="description">Course Description / Specialization</label>
+                <input 
+                    type="text" 
+                    id="description" 
+                    name="description" 
+                    value="{{ course.description or '' }}"
+                >
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary" style="margin-top: 15px;">Update Course</button>
+    </form>
+</div>
+{% endblock %}

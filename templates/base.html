@@ -17,9 +17,11 @@
             <div class="nav-links">
                 {% if session.get('role') == 'ADMIN' %}
                     <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}">📊 Dashboard</a>
-                    <a href="{{ url_for('admin_student_add') }}" class="nav-link {% if request.path == '/admin/student/add' %}active{% endif %}">➕ Add Student</a>
-                    <a href="{{ url_for('admin_teachers') }}" class="nav-link {% if request.path == '/admin/teachers' %}active{% endif %}">🧑‍🏫 Teachers</a>
-                    <a href="{{ url_for('student_list') }}" class="nav-link {% if request.path == '/students' %}active{% endif %}">📋 All Students</a>
+                    <a href="{{ url_for('admin_courses') }}" class="nav-link {% if request.path.startswith('/admin/course') %}active{% endif %}">📚 Courses</a>
+                    <a href="{{ url_for('admin_semesters') }}" class="nav-link {% if request.path == '/admin/semesters' %}active{% endif %}">🗓️ Semesters</a>
+                    <a href="{{ url_for('admin_subjects') }}" class="nav-link {% if request.path.startswith('/admin/subject') %}active{% endif %}">📖 Subjects</a>
+                    <a href="{{ url_for('admin_teachers') }}" class="nav-link {% if request.path == '/admin/teachers' or request.path == '/admin/assign-teachers' %}active{% endif %}">🧑‍🏫 Faculty</a>
+                    <a href="{{ url_for('student_list') }}" class="nav-link {% if request.path == '/students' or request.path == '/admin/academic-view' %}active{% endif %}">📋 Students</a>
                     <a href="{{ url_for('analytics') }}" class="nav-link {% if request.path == '/analytics' %}active{% endif %}">📈 Analytics</a>
                     <a href="{{ url_for('export_csv') }}" class="nav-link btn-nav-export">📥 Export CSV</a>
                     <span class="user-badge admin-badge">👤 Admin ({{ session.get('username') }})</span>
@@ -32,6 +34,7 @@
 
                 {% elif session.get('role') == 'STUDENT' %}
                     <a href="{{ url_for('student_dashboard') }}" class="nav-link {% if request.path == '/student/dashboard' %}active{% endif %}">🏠 Dashboard</a>
+                    <a href="{{ url_for('student_academic_profile') }}" class="nav-link {% if request.path == '/student/academic-profile' %}active{% endif %}">📋 Academic Profile</a>
                     <a href="{{ url_for('student_my_result') }}" class="nav-link {% if request.path == '/student/my-result' %}active{% endif %}">📄 My Result</a>
                     <a href="{{ url_for('student_my_performance') }}" class="nav-link {% if request.path == '/student/my-performance' %}active{% endif %}">📊 My Performance</a>
                     {% if session.get('student_id') %}

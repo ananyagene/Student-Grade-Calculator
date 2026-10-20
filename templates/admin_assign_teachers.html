@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Assign Faculty to Subjects - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="full-page-container">
+    <div class="page-header">
+        <div>
+            <h2>🧑‍🏫 Assign Faculty to Subjects</h2>
+            <p class="subtitle">Connect professors and teachers to specific curriculum subjects for course delivery and mark grading.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('admin_subjects') }}" class="btn-secondary">📖 Manage Subjects</a>
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">⬅️ Admin Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Subject Faculty Assignment Table Card -->
+    <div class="card-box">
+        <h4>Subject Faculty Allocation Matrix ({{ subjects|length }} subjects)</h4>
+        {% if subjects and subjects|length > 0 %}
+            <div class="table-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Course</th>
+                            <th>Semester</th>
+                            <th>Assigned Faculty</th>
+                            <th>Assign / Reassign Teacher</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in subjects %}
+                            <tr>
+                                <td><b><code>{{ s.subject_code }}</code></b></td>
+                                <td>{{ s.subject_name }}</td>
+                                <td>
+                                    <span class="status-badge" style="background-color: #2980b9; color: white;">
+                                        {{ s.course_code }}
+                                    </span>
+                                </td>
+                                <td>Semester {{ s.semester }}</td>
+                                <td>
+                                    {% if s.teacher_name %}
+                                        <span class="status-badge" style="background-color: #e67e22; color: white;">
+                                            🧑‍🏫 {{ s.teacher_name }}
+                                        </span>
+                                    {% else %}
+                                        <span style="color: #95a5a6; font-style: italic;">Unassigned</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('admin_assign_teachers') }}" style="display: flex; gap: 8px; align-items: center;">
+                                        <input type="hidden" name="subject_id" value="{{ s.id }}">
+                                        <select name="teacher_id" style="padding: 6px; font-size: 13px; border-radius: 4px; border: 1px solid #ccc; flex: 1;">
+                                            <option value="">-- Select Teacher --</option>
+                                            {% for t in teachers %}
+                                                <option value="{{ t.id }}" {% if t.id == s.teacher_id %}selected{% endif %}>
+                                                    {{ t.name }} ({{ t.username }})
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <button type="submit" class="btn-primary" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">Save Assignment</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">🧑‍🏫</div>
+                <h3>No Subjects Available to Assign</h3>
+                <p>Create subjects under Subject Management before allocating faculty.</p>
+                <a href="{{ url_for('admin_subjects') }}" class="btn-primary" style="margin-top: 10px; display: inline-block;">+ Add Subject</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

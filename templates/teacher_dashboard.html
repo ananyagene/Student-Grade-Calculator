@@ -6,8 +6,8 @@
 <div class="full-page-container">
     <div class="page-header">
         <div>
-            <h2>Teacher Dashboard</h2>
-            <p class="subtitle">Welcome, <b>{{ session.get('name') or session.get('username') }}</b> &bull; Assigned Course: <b>{{ assigned_course or 'All Courses' }}</b></p>
+            <h2>🧑‍🏫 Teacher Dashboard</h2>
+            <p class="subtitle">Welcome, <b>{{ session.get('name') or session.get('username') }}</b> &bull; Assigned Course Scope: <b>{{ assigned_course or 'All Courses' }}</b></p>
         </div>
         <div class="header-actions">
             <a href="{{ url_for('logout') }}" class="btn-secondary">🚪 Logout</a>
@@ -16,6 +16,10 @@
 
     <!-- Assigned Class Performance Stats -->
     <div class="analytics-metrics-grid">
+        <div class="stat-card">
+            <span class="stat-label">Assigned Subjects</span>
+            <span class="stat-val" style="color: #8e44ad;">{{ assigned_subjects|length }}</span>
+        </div>
         <div class="stat-card">
             <span class="stat-label">Assigned Students</span>
             <span class="stat-val">{{ total_students }}</span>
@@ -33,26 +37,75 @@
             <span class="stat-val text-danger">{{ failed_students }}</span>
         </div>
         <div class="stat-card">
-            <span class="stat-label">Course Pass Percentage</span>
+            <span class="stat-label">Course Pass %</span>
             <span class="stat-val" style="color: #27ae60;">{{ pass_pct }}%</span>
         </div>
-        <div class="stat-card">
-            <span class="stat-label">Top Scorer</span>
-            <span class="stat-val text-success" style="font-size: 17px;">
-                {% if highest_student %}
-                    {{ highest_student.student_name }} ({{ highest_student.percentage_formatted }})
-                {% else %}
-                    N/A
-                {% endif %}
-            </span>
+    </div>
+
+    <!-- My Assigned Subjects Card (Version 2B) -->
+    <div class="card-box" style="margin-top: 25px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <h4>📖 My Assigned Subjects ({{ assigned_subjects|length }})</h4>
+            <span style="font-size: 13px; color: #7f8c8d;">Faculty responsibility: Manage and update student subject marks</span>
         </div>
+
+        {% if assigned_subjects and assigned_subjects|length > 0 %}
+            <div class="table-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Course</th>
+                            <th>Semester</th>
+                            <th>Enrolled Students</th>
+                            <th>Subject Average</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in assigned_subjects %}
+                            <tr>
+                                <td><b><code>{{ sub.subject_code }}</code></b></td>
+                                <td><b>{{ sub.subject_name }}</b></td>
+                                <td>
+                                    <span class="status-badge" style="background-color: #2980b9; color: white;">
+                                        {{ sub.course_code }}
+                                    </span>
+                                </td>
+                                <td>Semester {{ sub.semester }}</td>
+                                <td><b>{{ sub.student_count }}</b> students enrolled</td>
+                                <td>
+                                    {% if sub.avg_mark != 'N/A' %}
+                                        <b>{{ sub.avg_mark }} / 100</b>
+                                    {% else %}
+                                        <span style="color: #95a5a6;">No marks yet</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('teacher_subject_marks', subject_id=sub.id) }}" class="btn-primary" style="padding: 6px 14px; font-size: 12px; text-decoration: none; display: inline-block;">
+                                        ✏️ Manage Marks
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📖</div>
+                <h3>No Specific Subjects Assigned</h3>
+                <p>You have not been allocated to specific subjects yet. Ask the Administrator to assign you to curriculum subjects in <i>Admin &rarr; Assign Teachers</i>.</p>
+            </div>
+        {% endif %}
     </div>
 
     <!-- Assigned Students Table Card -->
     <div class="card-box" style="margin-top: 25px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-            <h4>Assigned Students ({{ students|length }})</h4>
-            <span style="font-size: 13px; color: #7f8c8d;">Showing students enrolled in <b>{{ assigned_course or 'All Courses' }}</b></span>
+            <h4>👥 Enrolled Students in Course ({{ students|length }})</h4>
+            <span style="font-size: 13px; color: #7f8c8d;">Students in <b>{{ assigned_course or 'All Courses' }}</b></span>
         </div>
 
         {% if students and students|length > 0 %}
@@ -87,7 +140,7 @@
                                     </span>
                                 </td>
                                 <td class="action-cell">
-                                    <a href="{{ url_for('teacher_update_marks', student_id=s.id) }}" class="btn-action-edit" title="Add / Update Marks">✏️ Update Marks</a>
+                                    <a href="{{ url_for('teacher_update_marks', student_id=s.id) }}" class="btn-action-edit" title="Add / Update All Marks">✏️ Update Marks</a>
                                     <a href="{{ url_for('student_detail', student_id=s.id) }}" class="btn-action-view" title="View Detailed Result">👁️ View Result</a>
                                     <a href="{{ url_for('export_pdf', student_id=s.id) }}" class="btn-action-pdf" title="Download Official PDF">📄 PDF</a>
                                 </td>

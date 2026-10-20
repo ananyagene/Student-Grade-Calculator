@@ -10,8 +10,9 @@
             <p class="subtitle">Overview of student academic records, management tools, and analytics.</p>
         </div>
         <div class="header-actions">
+            <a href="{{ url_for('admin_courses') }}" class="btn-primary" style="background-color: #2980b9;">📚 Courses</a>
+            <a href="{{ url_for('admin_subjects') }}" class="btn-primary" style="background-color: #8e44ad;">📖 Subjects</a>
             <a href="{{ url_for('admin_student_add') }}" class="btn-primary">➕ Add Student</a>
-            <a href="{{ url_for('admin_teachers') }}" class="btn-primary" style="background-color: #27ae60;">🧑‍🏫 Manage Teachers</a>
             <a href="{{ url_for('export_csv') }}" class="btn-secondary">📥 Export CSV</a>
         </div>
     </div>
@@ -23,7 +24,15 @@
             <span class="stat-val">{{ total_students }}</span>
         </div>
         <div class="stat-card">
-            <span class="stat-label">Total Teachers</span>
+            <span class="stat-label">Academic Courses</span>
+            <span class="stat-val" style="color: #2980b9;">{{ total_courses }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Curriculum Subjects</span>
+            <span class="stat-val" style="color: #8e44ad;">{{ total_subjects }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Faculty / Teachers</span>
             <span class="stat-val" style="color: #27ae60;">{{ total_teachers }}</span>
         </div>
         <div class="stat-card">
@@ -40,7 +49,7 @@
         </div>
         <div class="stat-card">
             <span class="stat-label">Highest Scoring Student</span>
-            <span class="stat-val text-success" style="font-size: 17px;">
+            <span class="stat-val text-success" style="font-size: 16px;">
                 {% if highest_student %}
                     {{ highest_student.student_name }} ({{ highest_student.percentage_formatted }})
                 {% else %}
@@ -50,43 +59,73 @@
         </div>
     </div>
 
-    <!-- Admin Quick Navigation Actions -->
+    <!-- Academic Management Section (Version 2B) -->
     <div class="card-box" style="margin-top: 25px;">
-        <h4>Administrative Controls & Quick Navigation</h4>
+        <h4>🏛️ Academic Management System (Version 2B)</h4>
+        <div class="admin-actions-grid">
+            <a href="{{ url_for('admin_courses') }}" class="admin-action-card">
+                <span class="action-icon">📚</span>
+                <span class="action-title">Manage Courses</span>
+                <span class="action-desc">Add, edit, and delete academic programs (MCA, BCA, B.Tech)</span>
+            </a>
+
+            <a href="{{ url_for('admin_semesters') }}" class="admin-action-card">
+                <span class="action-icon">🗓️</span>
+                <span class="action-title">Manage Semesters</span>
+                <span class="action-desc">Configure semesters per course and view semester enrollment</span>
+            </a>
+
+            <a href="{{ url_for('admin_subjects') }}" class="admin-action-card">
+                <span class="action-icon">📖</span>
+                <span class="action-title">Manage Subjects</span>
+                <span class="action-desc">Add curriculum subjects with codes, course mapping & validation</span>
+            </a>
+
+            <a href="{{ url_for('admin_assign_teachers') }}" class="admin-action-card">
+                <span class="action-icon">🧑‍🏫</span>
+                <span class="action-title">Assign Teachers</span>
+                <span class="action-desc">Allocate faculty to specific curriculum subjects</span>
+            </a>
+
+            <a href="{{ url_for('admin_academic_view') }}" class="admin-action-card">
+                <span class="action-icon">🎓</span>
+                <span class="action-title">Students by Course & Sem</span>
+                <span class="action-desc">Filter and view students enrolled by program and semester</span>
+            </a>
+
+            <a href="{{ url_for('admin_teachers') }}" class="admin-action-card">
+                <span class="action-icon">👥</span>
+                <span class="action-title">Teacher Accounts</span>
+                <span class="action-desc">Create teacher accounts and assign course scope</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Student Records & Analytics Actions -->
+    <div class="card-box" style="margin-top: 25px;">
+        <h4>📋 Student Records & Analytical Controls</h4>
         <div class="admin-actions-grid">
             <a href="{{ url_for('admin_student_add') }}" class="admin-action-card">
                 <span class="action-icon">➕</span>
                 <span class="action-title">Add Student</span>
-                <span class="action-desc">Add a new student, enter marks, and calculate grades</span>
-            </a>
-
-            <a href="{{ url_for('admin_teachers') }}" class="admin-action-card">
-                <span class="action-icon">🧑‍🏫</span>
-                <span class="action-title">Manage Teachers</span>
-                <span class="action-desc">Create teacher accounts and assign courses/classes</span>
+                <span class="action-desc">Enroll a new student, enter marks, and calculate grades</span>
             </a>
 
             <a href="{{ url_for('student_list') }}" class="admin-action-card">
                 <span class="action-icon">📋</span>
-                <span class="action-title">View All Students</span>
-                <span class="action-desc">Inspect all records, edit, or delete existing students</span>
-            </a>
-
-            <a href="{{ url_for('student_list') }}" class="admin-action-card">
-                <span class="action-icon">🔍</span>
-                <span class="action-title">Search & Filter</span>
-                <span class="action-desc">Search by name or roll number, filter by PASS/FAIL & grades</span>
+                <span class="action-title">All Student Records</span>
+                <span class="action-desc">Inspect all student results, search, edit, or delete records</span>
             </a>
 
             <a href="{{ url_for('analytics') }}" class="admin-action-card">
                 <span class="action-icon">📈</span>
                 <span class="action-title">Class Analytics & Charts</span>
-                <span class="action-desc">View class pass rates, grade distribution & visual charts</span>
+                <span class="action-desc">View class pass rates, grade distributions & visual charts</span>
             </a>
 
             <a href="{{ url_for('export_csv') }}" class="admin-action-card">
                 <span class="action-icon">📥</span>
-                <span class="action-title">Export Records</span>
+                <span class="action-title">Export Records CSV</span>
                 <span class="action-desc">Download complete class records as a CSV spreadsheet</span>
             </a>
 
