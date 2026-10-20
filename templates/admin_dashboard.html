@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Student Result Management System{% endblock %}
+
+{% block content %}
+<div class="full-page-container">
+    <div class="page-header">
+        <div>
+            <h2>Admin Dashboard</h2>
+            <p class="subtitle">Overview of student academic records, management tools, and analytics.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('admin_student_add') }}" class="btn-primary">➕ Add Student</a>
+            <a href="{{ url_for('admin_teachers') }}" class="btn-primary" style="background-color: #27ae60;">🧑‍🏫 Manage Teachers</a>
+            <a href="{{ url_for('export_csv') }}" class="btn-secondary">📥 Export CSV</a>
+        </div>
+    </div>
+
+    <!-- Admin Overview Cards -->
+    <div class="analytics-metrics-grid">
+        <div class="stat-card">
+            <span class="stat-label">Total Students</span>
+            <span class="stat-val">{{ total_students }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Total Teachers</span>
+            <span class="stat-val" style="color: #27ae60;">{{ total_teachers }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Class Average</span>
+            <span class="stat-val">{{ class_avg }}%</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Students Passed</span>
+            <span class="stat-val text-success">{{ passed_students }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Students Failed</span>
+            <span class="stat-val text-danger">{{ failed_students }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Highest Scoring Student</span>
+            <span class="stat-val text-success" style="font-size: 17px;">
+                {% if highest_student %}
+                    {{ highest_student.student_name }} ({{ highest_student.percentage_formatted }})
+                {% else %}
+                    N/A
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <!-- Admin Quick Navigation Actions -->
+    <div class="card-box" style="margin-top: 25px;">
+        <h4>Administrative Controls & Quick Navigation</h4>
+        <div class="admin-actions-grid">
+            <a href="{{ url_for('admin_student_add') }}" class="admin-action-card">
+                <span class="action-icon">➕</span>
+                <span class="action-title">Add Student</span>
+                <span class="action-desc">Add a new student, enter marks, and calculate grades</span>
+            </a>
+
+            <a href="{{ url_for('admin_teachers') }}" class="admin-action-card">
+                <span class="action-icon">🧑‍🏫</span>
+                <span class="action-title">Manage Teachers</span>
+                <span class="action-desc">Create teacher accounts and assign courses/classes</span>
+            </a>
+
+            <a href="{{ url_for('student_list') }}" class="admin-action-card">
+                <span class="action-icon">📋</span>
+                <span class="action-title">View All Students</span>
+                <span class="action-desc">Inspect all records, edit, or delete existing students</span>
+            </a>
+
+            <a href="{{ url_for('student_list') }}" class="admin-action-card">
+                <span class="action-icon">🔍</span>
+                <span class="action-title">Search & Filter</span>
+                <span class="action-desc">Search by name or roll number, filter by PASS/FAIL & grades</span>
+            </a>
+
+            <a href="{{ url_for('analytics') }}" class="admin-action-card">
+                <span class="action-icon">📈</span>
+                <span class="action-title">Class Analytics & Charts</span>
+                <span class="action-desc">View class pass rates, grade distribution & visual charts</span>
+            </a>
+
+            <a href="{{ url_for('export_csv') }}" class="admin-action-card">
+                <span class="action-icon">📥</span>
+                <span class="action-title">Export Records</span>
+                <span class="action-desc">Download complete class records as a CSV spreadsheet</span>
+            </a>
+
+            <a href="{{ url_for('logout') }}" class="admin-action-card logout-card">
+                <span class="action-icon">🚪</span>
+                <span class="action-title">Logout</span>
+                <span class="action-desc">Sign out securely from the administrator account</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

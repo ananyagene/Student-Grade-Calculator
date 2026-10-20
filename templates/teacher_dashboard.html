@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Teacher Dashboard - Result Management System{% endblock %}
+
+{% block content %}
+<div class="full-page-container">
+    <div class="page-header">
+        <div>
+            <h2>Teacher Dashboard</h2>
+            <p class="subtitle">Welcome, <b>{{ session.get('name') or session.get('username') }}</b> &bull; Assigned Course: <b>{{ assigned_course or 'All Courses' }}</b></p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('logout') }}" class="btn-secondary">🚪 Logout</a>
+        </div>
+    </div>
+
+    <!-- Assigned Class Performance Stats -->
+    <div class="analytics-metrics-grid">
+        <div class="stat-card">
+            <span class="stat-label">Assigned Students</span>
+            <span class="stat-val">{{ total_students }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Course Average</span>
+            <span class="stat-val">{{ class_avg }}%</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Students Passed</span>
+            <span class="stat-val text-success">{{ passed_students }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Students Failed</span>
+            <span class="stat-val text-danger">{{ failed_students }}</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Course Pass Percentage</span>
+            <span class="stat-val" style="color: #27ae60;">{{ pass_pct }}%</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-label">Top Scorer</span>
+            <span class="stat-val text-success" style="font-size: 17px;">
+                {% if highest_student %}
+                    {{ highest_student.student_name }} ({{ highest_student.percentage_formatted }})
+                {% else %}
+                    N/A
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <!-- Assigned Students Table Card -->
+    <div class="card-box" style="margin-top: 25px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <h4>Assigned Students ({{ students|length }})</h4>
+            <span style="font-size: 13px; color: #7f8c8d;">Showing students enrolled in <b>{{ assigned_course or 'All Courses' }}</b></span>
+        </div>
+
+        {% if students and students|length > 0 %}
+            <div class="table-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Roll No.</th>
+                            <th>Student Name</th>
+                            <th>Course</th>
+                            <th>Sem</th>
+                            <th>Total Marks</th>
+                            <th>Percentage</th>
+                            <th>Grade</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in students %}
+                            <tr>
+                                <td><b>{{ s.roll_number }}</b></td>
+                                <td>{{ s.student_name }}</td>
+                                <td>{{ s.course }}</td>
+                                <td>{{ s.semester }}</td>
+                                <td>{{ s.total }} / {{ s.max_marks }}</td>
+                                <td><b>{{ s.percentage_formatted }}</b></td>
+                                <td><span class="grade-badge">{{ s.grade }}</span></td>
+                                <td>
+                                    <span class="status-badge {{ 'status-pass' if s.status == 'PASS' else 'status-fail' }}">
+                                        {{ s.status }}
+                                    </span>
+                                </td>
+                                <td class="action-cell">
+                                    <a href="{{ url_for('teacher_update_marks', student_id=s.id) }}" class="btn-action-edit" title="Add / Update Marks">✏️ Update Marks</a>
+                                    <a href="{{ url_for('student_detail', student_id=s.id) }}" class="btn-action-view" title="View Detailed Result">👁️ View Result</a>
+                                    <a href="{{ url_for('export_pdf', student_id=s.id) }}" class="btn-action-pdf" title="Download Official PDF">📄 PDF</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">👥</div>
+                <h3>No Assigned Students Found</h3>
+                <p>No students match your assigned course (<b>{{ assigned_course }}</b>). Ask the Administrator to enroll students or update your course assignment.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

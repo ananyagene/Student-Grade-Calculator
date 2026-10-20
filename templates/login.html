@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Student Result Management System{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h2>System Login</h2>
+            <p class="subtitle">Log in to your Admin, Teacher, or Student account.</p>
+        </div>
+
+        {% if error %}
+            <div class="error-box">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('login') }}" class="login-form">
+            <div class="form-group">
+                <label for="username">Username or Roll Number *</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    placeholder="e.g. admin, sharma_teacher, or 101" 
+                    required 
+                    autofocus
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password *</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="Enter password" 
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn-calculate" style="margin-top: 15px;">Login</button>
+        </form>
+
+        <div class="login-footer-links" style="margin-top: 18px; text-align: center; font-size: 14px;">
+            <p>New Student? <a href="{{ url_for('register') }}" style="color: #2980b9; font-weight: bold; text-decoration: none;">Register here</a></p>
+            <p style="margin-top: 6px;"><a href="{{ url_for('setup_admin') }}" style="color: #7f8c8d; font-size: 13px; text-decoration: none;">Initial Admin Setup Wizard</a></p>
+        </div>
+
+        <div class="login-help-card" style="margin-top: 20px;">
+            <h4>Demo Accounts / Default Credentials</h4>
+            <p><strong>Admin:</strong> <code>admin</code> / <code>admin123</code></p>
+            <p><strong>Teacher:</strong> Created by Admin via <em>Admin &rarr; Teachers</em></p>
+            <p><strong>Student:</strong> Roll Number (e.g. <code>101</code>) / <code>student123</code> or register above</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

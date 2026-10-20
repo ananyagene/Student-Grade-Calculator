@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}My Performance Analysis - {{ student.student_name }}{% endblock %}
+
+{% block content %}
+<div class="calculator-container" style="max-width: 820px;">
+    <div class="page-header">
+        <div>
+            <h2>My Performance Analysis</h2>
+            <p class="subtitle">Detailed academic evaluation, strengths, areas to improve, and visual charts.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('export_pdf', student_id=student.id) }}" class="btn-export-pdf">📄 Download PDF</a>
+            <a href="{{ url_for('student_dashboard') }}" class="btn-secondary">⬅️ Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Analytical Breakdown Cards -->
+    <div class="card-box">
+        <h4>Performance Metrics</h4>
+        <div class="analytics-grid">
+            <div class="metric-card">
+                <span class="metric-label">Average Marks</span>
+                <span class="metric-value">{{ student.average_marks }} / 100</span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Passed Subjects</span>
+                <span class="metric-value">{{ student.passed_count }} / {{ student.total_subjects }}</span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Failed Subjects</span>
+                <span class="metric-value">{{ student.failed_count }} / {{ student.total_subjects }}</span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Pass Percentage</span>
+                <span class="metric-value">{{ student.pass_percentage }}%</span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Highest Scoring Subject</span>
+                <span class="metric-value">
+                    {% for s in student.highest_subjects %}
+                        {{ s.name }} ({{ s.marks }}){% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Lowest Scoring Subject</span>
+                <span class="metric-value">
+                    {% for s in student.lowest_subjects %}
+                        {{ s.name }} ({{ s.marks }}){% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Performance Category</span>
+                <span class="metric-value highlight">{{ student.performance_category }}</span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Grade Distribution</span>
+                <span class="metric-value">
+                    A: {{ student.grade_distribution.A }} | B: {{ student.grade_distribution.B }} | C: {{ student.grade_distribution.C }} | D: {{ student.grade_distribution.D }} | F: {{ student.grade_distribution.F }}
+                </span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Strong Subjects (>= 70)</span>
+                <span class="metric-value text-success">
+                    {{ student.strong_subjects|join(', ') if student.strong_subjects else 'None' }}
+                </span>
+            </div>
+
+            <div class="metric-card">
+                <span class="metric-label">Subjects Needing Improvement (< 70)</span>
+                <span class="metric-value text-danger">
+                    {{ student.weak_subjects|join(', ') if student.weak_subjects else 'None' }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Personal Chart -->
+    <div class="card-box" id="charts">
+        <h4>Subject Performance Chart</h4>
+        <div class="chart-container">
+            <canvas id="studentPerformanceChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const ctx = document.getElementById('studentPerformanceChart').getContext('2d');
+    const labels = {{ student.subjects | map(attribute='name') | list | tojson }};
+    const data = {{ student.subjects | map(attribute='marks') | list | tojson }};
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Marks (out of 100)',
+                data: data,
+                backgroundColor: data.map(m => m >= 70 ? 'rgba(46, 204, 113, 0.7)' : (m >= 40 ? 'rgba(52, 152, 219, 0.7)' : 'rgba(231, 76, 60, 0.7)')),
+                borderColor: data.map(m => m >= 70 ? '#27ae60' : (m >= 40 ? '#2980b9' : '#c0392b')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

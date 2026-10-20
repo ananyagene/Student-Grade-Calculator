@@ -11,7 +11,12 @@
         </div>
         <div class="header-actions">
             <a href="{{ url_for('export_pdf', student_id=student.id) }}" class="btn-export-pdf">📄 Download PDF Report</a>
-            <a href="{{ url_for('student_list') }}" class="btn-secondary">⬅️ Back to List</a>
+            {% if session.get('role') == 'ADMIN' %}
+                <a href="{{ url_for('admin_student_edit', student_id=student.id) }}" class="btn-primary">✏️ Edit</a>
+                <a href="{{ url_for('student_list') }}" class="btn-secondary">⬅️ All Students</a>
+            {% else %}
+                <a href="{{ url_for('student_dashboard') }}" class="btn-secondary">⬅️ Dashboard</a>
+            {% endif %}
         </div>
     </div>
 

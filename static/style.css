@@ -475,6 +475,29 @@ button:active, a:active {
     font-size: 12px;
 }
 
+.btn-action-edit {
+    background-color: #f39c12;
+    color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.btn-action-delete {
+    background-color: #e74c3c;
+    color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.btn-action-delete:hover {
+    background-color: #c0392b;
+}
+
 /* Analytics Grid */
 .analytics-grid {
     display: grid;
@@ -692,4 +715,152 @@ button:active, a:active {
         flex-direction: column;
         align-items: flex-start;
     }
+}
+
+/* =========================================================
+   Version 2A: Authentication, User Roles & Flash Alerts
+   ========================================================= */
+
+/* Flash Messages */
+.flash-messages-container {
+    margin-bottom: 22px;
+}
+
+.flash-alert {
+    padding: 12px 18px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.alert-danger, .alert-error {
+    background-color: #fde8e7;
+    border: 1px solid #f9c7c5;
+    border-left: 4px solid #e74c3c;
+    color: #c0392b;
+}
+
+.alert-warning {
+    background-color: #fef9e7;
+    border: 1px solid #fcf3cf;
+    border-left: 4px solid #f1c40f;
+    color: #9a7d0a;
+}
+
+.alert-info {
+    background-color: #ebf5fb;
+    border: 1px solid #d4e6f1;
+    border-left: 4px solid #3498db;
+    color: #2471a3;
+}
+
+.alert-success {
+    background-color: #eafaf1;
+    border: 1px solid #d5f5e3;
+    border-left: 4px solid #2ecc71;
+    color: #1e8449;
+}
+
+/* Navigation User Role Badges */
+.user-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    color: #ffffff;
+}
+
+.user-badge.admin-badge {
+    background-color: #e74c3c;
+}
+
+.user-badge.teacher-badge {
+    background-color: #e67e22;
+}
+
+.user-badge.student-badge {
+    background-color: #3498db;
+}
+
+.btn-nav-logout {
+    background-color: #95a5a6;
+    color: #ffffff !important;
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.btn-nav-logout:hover {
+    background-color: #7f8c8d !important;
+}
+
+/* Login & Auth Containers */
+.login-container {
+    max-width: 460px;
+    margin: 30px auto;
+    width: 100%;
+}
+
+.login-card {
+    background: #ffffff;
+    border: 1px solid #e1e8ed;
+    border-radius: 8px;
+    padding: 30px 32px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.login-header h2 {
+    color: #2c3e50;
+    margin-bottom: 6px;
+}
+
+.login-form .form-group {
+    margin-bottom: 16px;
+}
+
+.login-footer-links {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.login-help-card {
+    background-color: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #475569;
+    margin-top: 20px;
+}
+
+.login-help-card h4 {
+    font-size: 12px;
+    color: #334155;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.login-help-card p {
+    margin-bottom: 4px;
+}
+
+.login-help-card code {
+    background: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
 }

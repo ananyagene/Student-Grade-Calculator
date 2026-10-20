@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Update Marks - {{ student.student_name }}{% endblock %}
+
+{% block content %}
+<div class="calculator-container">
+    <div class="page-header">
+        <div>
+            <h2>Update Marks: {{ student.student_name }}</h2>
+            <p class="subtitle">Roll Number: <b>{{ student.roll_number }}</b> &bull; Course: <b>{{ student.course }}</b> (Sem {{ student.semester }})</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('teacher_dashboard') }}" class="btn-secondary">⬅️ Teacher Dashboard</a>
+        </div>
+    </div>
+
+    {% if error %}
+        <div class="error-box">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('teacher_update_marks', student_id=student.id) }}" class="entry-form">
+        <div class="section-title">Enter / Update Subject Marks (out of 100)</div>
+        <div id="subjects-container">
+            {% for sub in student.subjects %}
+                <div class="subject-row">
+                    <input 
+                        type="text" 
+                        name="subject_name" 
+                        placeholder="Subject Name" 
+                        value="{{ sub.name }}" 
+                        required
+                    >
+                    <input 
+                        type="number" 
+                        name="subject_marks" 
+                        min="0" 
+                        max="100" 
+                        step="any" 
+                        placeholder="Marks (0-100)" 
+                        value="{{ sub.marks }}" 
+                        required
+                    >
+                    <button type="button" class="btn-remove" onclick="removeSubject(this)">Remove</button>
+                </div>
+            {% endfor %}
+        </div>
+
+        <button type="button" class="btn-add" onclick="addSubject()">+ Add Subject</button>
+        <button type="submit" class="btn-calculate">Save Marks & Recalculate</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function addSubject() {
+        const container = document.getElementById('subjects-container');
+        const count = container.getElementsByClassName('subject-row').length + 1;
+        const newRow = document.createElement('div');
+        newRow.className = 'subject-row';
+        newRow.innerHTML = `
+            <input type="text" name="subject_name" placeholder="Subject Name" value="Subject ${count}" required>
+            <input type="number" name="subject_marks" min="0" max="100" step="any" placeholder="Marks (0-100)" required>
+            <button type="button" class="btn-remove" onclick="removeSubject(this)">Remove</button>
+        `;
+        container.appendChild(newRow);
+    }
+
+    function removeSubject(button) {
+        const container = document.getElementById('subjects-container');
+        const rows = container.getElementsByClassName('subject-row');
+        if (rows.length > 1) {
+            button.closest('.subject-row').remove();
+        } else {
+            alert('At least one subject row is required.');
+        }
+    }
+</script>
+{% endblock %}

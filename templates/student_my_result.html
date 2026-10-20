@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}My Result - {{ student.student_name }}{% endblock %}
+
+{% block content %}
+<div class="calculator-container" style="max-width: 820px;">
+    <div class="page-header">
+        <div>
+            <h2>My Subject Results</h2>
+            <p class="subtitle">Complete subject-wise marks, grades, status, and remarks for {{ student.student_name }}.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('export_pdf', student_id=student.id) }}" class="btn-export-pdf">📄 Download PDF</a>
+            <a href="{{ url_for('student_export_csv') }}" class="btn-secondary">📥 Download CSV</a>
+            <a href="{{ url_for('student_dashboard') }}" class="btn-secondary">⬅️ Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Subject-Wise Table -->
+    <div class="card-box">
+        <h4>Subject Breakdown</h4>
+        <table class="grades-table">
+            <thead>
+                <tr>
+                    <th>Subject Name</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                    <th>Status</th>
+                    <th>Remark</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in student.subjects %}
+                    <tr>
+                        <td><b>{{ sub.name }}</b></td>
+                        <td>{{ sub.marks }}</td>
+                        <td><span class="grade-badge">{{ sub.grade }}</span></td>
+                        <td>
+                            <span class="status-badge {{ 'status-pass' if sub.status == 'PASS' else 'status-fail' }}">
+                                {{ sub.status }}
+                            </span>
+                        </td>
+                        <td>{{ sub.remark }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Overall Summary -->
+        <div class="overall-summary" style="margin-top: 20px;">
+            <p><strong>Total Marks:</strong> {{ student.total }} / {{ student.max_marks }}</p>
+            <p><strong>Percentage:</strong> {{ student.percentage_formatted }}</p>
+            <p><strong>Overall Grade:</strong> <span class="grade-badge">{{ student.grade }}</span></p>
+            <p><strong>Overall Status:</strong> 
+                <span class="status-badge {{ 'status-pass' if student.status == 'PASS' else 'status-fail' }}">
+                    {{ student.status }}
+                </span>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

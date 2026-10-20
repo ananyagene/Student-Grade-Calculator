@@ -132,6 +132,30 @@ The project started as a simple grade calculator and is being gradually develope
 * Save marks
 * Retrieve saved students after restarting the application
 
+### Version 2A — Basic Authentication and Role Management
+
+#### Three User Roles & Access Control
+* **Admin**:
+  * Full administrative access to student records (Add, Edit, Delete).
+  * Create Teacher accounts and assign specific courses/classes (e.g., `MCA AI`, `BCA`, or `ALL`).
+  * Class Analytics, Grade Distribution, and System Overview.
+  * Class CSV spreadsheet export.
+* **Teacher**:
+  * Scoped dashboard displaying only students assigned to their designated course/class.
+  * Enter and update subject marks for assigned students with automatic recalculation.
+  * View detailed student result scorecards and download student PDF reports.
+* **Student**:
+  * Self-registration portal with auto-provisioned student account.
+  * Dedicated student dashboard, personal result card, and interactive performance charts.
+  * Download personal official PDF report card and personal CSV scorecard.
+  * Strict security isolation: Cannot view other students' records, modify marks, or access Admin/Teacher routes.
+
+#### Security & Authentication
+* Password hashing using Werkzeug (`generate_password_hash` and `check_password_hash`).
+* Session-based login management with role decorators (`@login_required`, `@admin_required`, `@teacher_required`).
+* Initial Admin Setup Wizard (`/setup-admin`) for initial configuration.
+* Flash alert system for user notifications and permission denials.
+
 ## Grading System
 
 | Marks/Percentage | Grade |
@@ -185,44 +209,59 @@ The project started as a simple grade calculator and is being gradually develope
 ```text
 student-grade-calculator/
 │
-├── app.py
-├── README.md
-│
-├── templates/
-│   └── index.html
+├── app.py                      # Flask backend, auth logic, role routing, database operations
+├── test_v2a.py                 # Automated integration and security test suite
+├── README.md                   # Complete documentation
+├── student_results.db          # SQLite database (students, subjects, users)
 │
 ├── static/
-│   └── style.css
+│   └── style.css               # Clean, responsive CSS styling and role badges
 │
-└── database/
-    └── students.db
+└── templates/
+    ├── base.html               # Base layout with role-aware navigation and flash alerts
+    ├── login.html              # Unified login page for Admin, Teacher, and Student
+    ├── register.html           # Student self-registration form
+    ├── setup_admin.html        # Initial Admin setup wizard
+    ├── admin_dashboard.html    # Admin management overview & statistics
+    ├── admin_teachers.html     # Teacher account creation & course assignment
+    ├── admin_student_add.html  # Admin student entry form
+    ├── admin_student_edit.html # Admin student edit form
+    ├── teacher_dashboard.html  # Teacher scoped dashboard for assigned classes
+    ├── teacher_update_marks.html # Teacher marks update and recalculation
+    ├── student_dashboard.html  # Student personal dashboard
+    ├── student_my_result.html  # Student detailed result scorecard
+    ├── student_my_performance.html # Student visual performance analytics
+    ├── students.html           # Admin directory of all students with search & filters
+    ├── student_detail.html     # Detailed student scorecard view
+    ├── analytics.html          # Class-wide analytics with Chart.js charts
+    └── index.html              # Grade calculator landing page
 ```
+
+## Default Accounts & Testing Credentials
+
+| Role | Username / Identifier | Password | Access Scope |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin` | `admin123` | Full system access, teacher creation, student CRUD, analytics, CSV export |
+| **Teacher** | Created by Admin | Set by Admin | Students in assigned course (e.g. `MCA AI`), mark editing, PDF download |
+| **Student** | Roll Number (e.g. `101`) or custom username | `student123` or registered password | Personal scorecard, performance charts, personal PDF and CSV downloads |
 
 ## How to Run
 
-1. Clone the repository.
-
+1. Clone or open the repository.
 2. Open the project folder in the terminal.
-
-3. Install the required dependencies.
-
-```bash
-pip install flask
-```
-
-Install any additional libraries required for CSV/PDF/chart functionality if they are used by the project.
-
-4. Run the Flask application.
-
-```bash
-python app.py
-```
-
-5. Open the local URL shown in the terminal, usually:
-
-```text
-http://127.0.0.1:5000/
-```
+3. Install required dependencies:
+   ```bash
+   pip install flask reportlab
+   ```
+4. Run the Flask application:
+   ```bash
+   python app.py
+   ```
+5. Open `http://127.0.0.1:5000/` in your browser.
+6. To run the automated test suite:
+   ```bash
+   python test_v2a.py
+   ```
 
 ## Development Progress
 
@@ -232,20 +271,17 @@ http://127.0.0.1:5000/
 * [x] Version 1D — Pass/Fail Status
 * [x] Version 1E — Subject-wise Remarks
 * [x] Version 1F — Student Result Management System
+* [x] Version 2A — Basic Authentication and Role Management (Admin, Teacher, Student)
 
 ## Future Improvements
 
 Possible future improvements may include:
 
-* User authentication
-* Admin dashboard
-* Role-based access
-* Cloud database
-* Online deployment improvements
-* Advanced analytics
-* AI-based performance insights
-* Automated recommendations
-* Student login portal
+* Cloud database deployment (PostgreSQL / MySQL)
+* Multi-semester GPA / CGPA transcript calculation
+* Automated email notifications / result publishing
+* Attendance tracking integration
+* AI-based performance insights and study tips
 
 ## Purpose
 

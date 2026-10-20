@@ -7,11 +7,11 @@
     <div class="page-header">
         <div>
             <h2>Student Result Records</h2>
-            <p class="subtitle">Search, filter, sort, and download individual result cards.</p>
+            <p class="subtitle">Search, filter, sort, edit, and delete student records.</p>
         </div>
         <div class="header-actions">
             <a href="{{ url_for('export_csv') }}" class="btn-secondary">📥 Export All to CSV</a>
-            <a href="{{ url_for('index') }}" class="btn-primary">➕ Add New Student</a>
+            <a href="{{ url_for('admin_student_add') }}" class="btn-primary">➕ Add New Student</a>
         </div>
     </div>
 
@@ -99,7 +99,11 @@
                             </td>
                             <td class="action-cell">
                                 <a href="{{ url_for('student_detail', student_id=s.id) }}" class="btn-action-view" title="View Result">👁️ View</a>
+                                <a href="{{ url_for('admin_student_edit', student_id=s.id) }}" class="btn-action-edit" title="Edit Student">✏️ Edit</a>
                                 <a href="{{ url_for('export_pdf', student_id=s.id) }}" class="btn-action-pdf" title="Download PDF">📄 PDF</a>
+                                <form method="POST" action="{{ url_for('admin_student_delete', student_id=s.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this student?');">
+                                    <button type="submit" class="btn-action-delete" title="Delete Student">🗑️</button>
+                                </form>
                             </td>
                         </tr>
                     {% endfor %}
@@ -111,7 +115,7 @@
             <div class="empty-icon">📂</div>
             <h3>No Student Records Found</h3>
             <p>No student results matched your search/filter criteria, or no students have been added yet.</p>
-            <a href="{{ url_for('index') }}" class="btn-primary">➕ Add First Student</a>
+            <a href="{{ url_for('admin_student_add') }}" class="btn-primary">➕ Add First Student</a>
         </div>
     {% endif %}
 </div>

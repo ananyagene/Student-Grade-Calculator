@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Teacher Management - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="full-page-container">
+    <div class="page-header">
+        <div>
+            <h2>Teacher Account Management</h2>
+            <p class="subtitle">Create and manage faculty accounts with course and class assignments.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('admin_dashboard') }}" class="btn-secondary">⬅️ Admin Dashboard</a>
+        </div>
+    </div>
+
+    {% if error %}
+        <div class="error-box">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <!-- Create Teacher Form Card -->
+    <div class="card-box" style="margin-bottom: 25px;">
+        <h4>➕ Create New Teacher Account</h4>
+        <form method="POST" action="{{ url_for('admin_teachers') }}" class="entry-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Teacher Full Name *</label>
+                    <input 
+                        type="text" 
+                        id="name" 
+                        name="name" 
+                        placeholder="e.g. Prof. Sharma" 
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username *</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        placeholder="e.g. prof_sharma" 
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Min 4 characters" 
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="assigned_course">Assigned Course / Class *</label>
+                    <input 
+                        type="text" 
+                        id="assigned_course" 
+                        name="assigned_course" 
+                        placeholder="e.g. MCA AI, BCA, or ALL" 
+                        list="course_suggestions"
+                        required
+                    >
+                    <datalist id="course_suggestions">
+                        <option value="ALL">All Courses</option>
+                        {% for c in courses %}
+                            <option value="{{ c }}">{{ c }}</option>
+                        {% endfor %}
+                    </datalist>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" style="margin-top: 10px;">Create Teacher Account</button>
+        </form>
+    </div>
+
+    <!-- Existing Teachers Table -->
+    <div class="card-box">
+        <h4>Registered Teachers ({{ teachers|length }})</h4>
+        {% if teachers and teachers|length > 0 %}
+            <div class="table-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Teacher Name</th>
+                            <th>Username</th>
+                            <th>Assigned Course / Class</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in teachers %}
+                            <tr>
+                                <td><b>{{ t.name or 'Faculty Member' }}</b></td>
+                                <td><code>{{ t.username }}</code></td>
+                                <td>
+                                    <span class="status-badge" style="background-color: #2980b9; color: white;">
+                                        {{ t.assigned_course or 'ALL' }}
+                                    </span>
+                                </td>
+                                <td>{{ t.created_at }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state" style="padding: 25px;">
+                <p>No teacher accounts created yet. Use the form above to add your first faculty member.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - {{ student.student_name }}{% endblock %}
+
+{% block content %}
+<div class="calculator-container" style="max-width: 820px;">
+    <div class="page-header">
+        <div>
+            <h2>Welcome, {{ student.student_name }}!</h2>
+            <p class="subtitle">Here is an overview of your current academic status.</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('export_pdf', student_id=student.id) }}" class="btn-export-pdf">📄 Download PDF Report</a>
+            <a href="{{ url_for('student_export_csv') }}" class="btn-secondary">📥 Export My CSV</a>
+        </div>
+    </div>
+
+    <!-- Student Result Summary Card -->
+    <div class="result-summary-card">
+        <div class="summary-header">
+            <h3>MY RESULT SUMMARY</h3>
+            <span class="status-badge {{ 'status-pass' if student.status == 'PASS' else 'status-fail' }}">
+                {{ student.status }}
+            </span>
+        </div>
+
+        <div class="summary-meta-grid">
+            <div><strong>Student Name:</strong> {{ student.student_name }}</div>
+            <div><strong>Roll Number:</strong> {{ student.roll_number }}</div>
+            <div><strong>Course / Class:</strong> {{ student.course }}</div>
+            <div><strong>Semester:</strong> {{ student.semester }}</div>
+            <div><strong>Academic Year:</strong> {{ student.academic_year }}</div>
+            <div><strong>Total Marks:</strong> {{ student.total }} / {{ student.max_marks }}</div>
+            <div><strong>Percentage:</strong> {{ student.percentage_formatted }}</div>
+            <div><strong>Overall Grade:</strong> <span class="grade-badge">{{ student.grade }}</span></div>
+            <div><strong>Overall Status:</strong> <b>{{ student.status }}</b></div>
+        </div>
+
+        <div class="performance-message-box">
+            <strong>Performance Feedback:</strong> {{ student.performance_message }}
+        </div>
+
+        {% if student.failed_count > 0 %}
+            <div class="fail-safe-box warning">
+                ⚠️ {{ student.fail_safe_message }}
+            </div>
+        {% else %}
+            <div class="fail-safe-box success">
+                ✅ {{ student.fail_safe_message }}
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Student Quick Navigation Cards -->
+    <div class="card-box">
+        <h4>My Academic Portal</h4>
+        <div class="admin-actions-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+            <a href="{{ url_for('student_my_result') }}" class="admin-action-card">
+                <span class="action-icon">📄</span>
+                <span class="action-title">My Result</span>
+                <span class="action-desc">View subject-wise marks, individual grades & remarks</span>
+            </a>
+
+            <a href="{{ url_for('student_my_performance') }}" class="admin-action-card">
+                <span class="action-icon">📊</span>
+                <span class="action-title">My Performance</span>
+                <span class="action-desc">View strong/weak subjects, averages & analytics</span>
+            </a>
+
+            <a href="{{ url_for('student_my_performance') }}#charts" class="admin-action-card">
+                <span class="action-icon">📈</span>
+                <span class="action-title">My Charts</span>
+                <span class="action-desc">Inspect visual charts for your subject performance</span>
+            </a>
+
+            <a href="{{ url_for('export_pdf', student_id=student.id) }}" class="admin-action-card">
+                <span class="action-icon">📥</span>
+                <span class="action-title">Export My Result</span>
+                <span class="action-desc">Download an official PDF report card or CSV</span>
+            </a>
+
+            <a href="{{ url_for('logout') }}" class="admin-action-card logout-card">
+                <span class="action-icon">🚪</span>
+                <span class="action-title">Logout</span>
+                <span class="action-desc">Sign out securely from your student account</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

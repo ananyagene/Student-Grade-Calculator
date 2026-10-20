@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Student Result Management System{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- Lightweight Chart.js from CDN for clean charts -->
+    <!-- Lightweight Chart.js for visualizations -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -15,21 +15,59 @@
         <div class="nav-container">
             <a href="{{ url_for('index') }}" class="nav-brand">🎓 ResultManager</a>
             <div class="nav-links">
-                <a href="{{ url_for('index') }}" class="nav-link {% if request.path == '/' %}active{% endif %}">➕ Add / Calculate</a>
-                <a href="{{ url_for('student_list') }}" class="nav-link {% if request.path == '/students' %}active{% endif %}">📋 All Students</a>
-                <a href="{{ url_for('analytics') }}" class="nav-link {% if request.path == '/analytics' %}active{% endif %}">📊 Class Analytics</a>
-                <a href="{{ url_for('export_csv') }}" class="nav-link btn-nav-export">📥 Export CSV</a>
+                {% if session.get('role') == 'ADMIN' %}
+                    <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.path == '/admin/dashboard' %}active{% endif %}">📊 Dashboard</a>
+                    <a href="{{ url_for('admin_student_add') }}" class="nav-link {% if request.path == '/admin/student/add' %}active{% endif %}">➕ Add Student</a>
+                    <a href="{{ url_for('admin_teachers') }}" class="nav-link {% if request.path == '/admin/teachers' %}active{% endif %}">🧑‍🏫 Teachers</a>
+                    <a href="{{ url_for('student_list') }}" class="nav-link {% if request.path == '/students' %}active{% endif %}">📋 All Students</a>
+                    <a href="{{ url_for('analytics') }}" class="nav-link {% if request.path == '/analytics' %}active{% endif %}">📈 Analytics</a>
+                    <a href="{{ url_for('export_csv') }}" class="nav-link btn-nav-export">📥 Export CSV</a>
+                    <span class="user-badge admin-badge">👤 Admin ({{ session.get('username') }})</span>
+                    <a href="{{ url_for('logout') }}" class="nav-link btn-nav-logout">🚪 Logout</a>
+
+                {% elif session.get('role') == 'TEACHER' %}
+                    <a href="{{ url_for('teacher_dashboard') }}" class="nav-link {% if request.path == '/teacher/dashboard' %}active{% endif %}">📊 My Dashboard</a>
+                    <span class="user-badge teacher-badge">🧑‍🏫 {{ session.get('name') or session.get('username') }} ({{ session.get('assigned_course') or 'All Courses' }})</span>
+                    <a href="{{ url_for('logout') }}" class="nav-link btn-nav-logout">🚪 Logout</a>
+
+                {% elif session.get('role') == 'STUDENT' %}
+                    <a href="{{ url_for('student_dashboard') }}" class="nav-link {% if request.path == '/student/dashboard' %}active{% endif %}">🏠 Dashboard</a>
+                    <a href="{{ url_for('student_my_result') }}" class="nav-link {% if request.path == '/student/my-result' %}active{% endif %}">📄 My Result</a>
+                    <a href="{{ url_for('student_my_performance') }}" class="nav-link {% if request.path == '/student/my-performance' %}active{% endif %}">📊 My Performance</a>
+                    {% if session.get('student_id') %}
+                        <a href="{{ url_for('export_pdf', student_id=session.get('student_id')) }}" class="nav-link btn-nav-export">📄 Export PDF</a>
+                    {% endif %}
+                    <span class="user-badge student-badge">🎓 {{ session.get('name') or session.get('username') }}</span>
+                    <a href="{{ url_for('logout') }}" class="nav-link btn-nav-logout">🚪 Logout</a>
+
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="nav-link {% if request.path == '/login' %}active{% endif %}">🔑 Login</a>
+                    <a href="{{ url_for('register') }}" class="nav-link {% if request.path == '/register' %}active{% endif %}">📝 Student Register</a>
+                {% endif %}
             </div>
         </div>
     </nav>
 
     <!-- Main Content Area -->
     <main class="main-wrapper">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages-container">
+                    {% for category, message in messages %}
+                        <div class="flash-alert alert-{{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
     </main>
 
     <footer class="footer">
-        <p>Student Result Management System &copy; 2026-27 | Simple & Accessible Education Tools</p>
+        <p>Student Result Management System &copy; 2026–27 | Version 2A — Role-Based Access Control</p>
     </footer>
 
     {% block scripts %}{% endblock %}
