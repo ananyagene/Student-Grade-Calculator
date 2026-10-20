@@ -1,300 +1,432 @@
 # Student Grade Calculator
 
-A beginner-friendly Student Result Management System built using Python, Flask, HTML, CSS, JavaScript, and SQLite.
+A Student Result Management System built using Python, Flask, HTML, CSS, JavaScript, and SQLite.
 
-The project started as a simple grade calculator and is being gradually developed into a complete student result management application.
+I started this project as a basic grade calculator where users could enter marks and calculate their percentage and grade. Over time, I kept adding features to make it more useful.
+
+The project now includes student result management, performance analysis, separate dashboards for admins, teachers and students, and academic management features.
+
+I've divided the development into versions so that I can add new features while learning how different parts of a web application work together.
 
 ## Features
 
 ### Version 1A — Basic Grade Calculator
 
-* Enter student name
-* Enter marks for subjects
-* Calculate total marks
-* Calculate percentage
-* Calculate overall grade
-* Basic input validation
+The first version focused on basic result calculations.
+
+- Enter student name and subject marks
+- Calculate total marks and percentage
+- Calculate overall grade
+- Validate marks entered by the user
 
 ### Version 1B — Dynamic Subjects
 
-* Add subjects dynamically
-* Remove subjects
-* Support any number of subjects
-* Recalculate results automatically
+Instead of having a fixed number of subjects, users can now:
+
+- Add subjects dynamically
+- Remove subjects
+- Enter marks for any number of subjects
+- Recalculate results automatically
 
 ### Version 1C — Individual Subject Grades
 
-* Calculate grade for every subject
-* Display subject-wise marks and grades
+- Calculate grades for each subject separately
+- Display subject-wise marks and grades
 
 ### Version 1D — Pass/Fail Status
 
-* Subject-wise PASS/FAIL status
-* 40 or above = PASS
-* Below 40 = FAIL
-* Overall PASS/FAIL status
+Added pass/fail calculation for individual subjects and the overall result.
+
+- Marks of 40 or above are considered PASS
+- Marks below 40 are considered FAIL
+- Students must pass every subject to receive an overall PASS
 
 ### Version 1E — Subject-wise Remarks
 
-* Subject-wise performance remarks
-* 90–100 → Excellent
-* 80–89 → Very Good
-* 70–79 → Good
-* 60–69 → Satisfactory
-* 40–59 → Needs Improvement
-* Below 40 → Fail
+Added automatic remarks based on marks obtained in each subject.
+
+| Marks | Remark |
+|---|---|
+| 90–100 | Excellent |
+| 80–89 | Very Good |
+| 70–79 | Good |
+| 60–69 | Satisfactory |
+| 40–59 | Needs Improvement |
+| Below 40 | Fail |
 
 ### Version 1F — Student Result Management System
 
+This was a major update where the project moved beyond calculating results for one student.
+
+#### Student Management
+
+- Add multiple students
+- Store student information and results
+- View individual student records
+- Edit and delete student records
+- Save roll number, course, semester and academic year
+
 #### Result Analysis
 
-* Result Summary Card
-* Highest Scoring Subject
-* Lowest Scoring Subject
-* Average Marks
-* Automatic Performance Message
-* Passed Subjects Count
-* Failed Subjects Count
-* Grade Distribution
-* Performance Category
-* Strong Subjects
-* Subjects Needing Improvement
-* Pass Percentage
-* Fail-safe Result Message
+Each student result includes:
 
-#### Student Details
+- Total marks and percentage
+- Overall grade and pass/fail status
+- Highest and lowest scoring subjects
+- Average marks
+- Number of passed and failed subjects
+- Grade distribution
+- Strong subjects and subjects needing improvement
+- Performance category and automatic remarks
+- Pass percentage
+- Result messages for different performance levels
 
-* Student Name
-* Roll Number
-* Course/Class
-* Semester
-* Academic Year
+#### Search, Filter and Sort
 
-#### Multiple Students
-
-* Add multiple students
-* Store multiple student results
-* View saved students
-* View individual student results
-
-#### Search & Filter
-
-* Search by student name
-* Search by roll number
-* Filter by PASS/FAIL
-* Filter by grade
-
-#### Sorting
-
-* Sort by percentage
-* Highest to lowest percentage
-* Lowest to highest percentage
-* Sort by name
-* A–Z and Z–A
+- Search students by name or roll number
+- Filter students by grade or pass/fail status
+- Sort students by percentage
+- Sort names alphabetically (A–Z and Z–A)
 
 #### Class Analytics
 
-* Total students
-* Class average percentage
-* Highest scoring student
-* Lowest scoring student
-* Number of passed students
-* Number of failed students
-* Class pass percentage
+Added a separate section to understand overall class performance.
 
-#### Charts
+- Total number of students
+- Class average percentage
+- Highest and lowest scoring students
+- Number of passed and failed students
+- Overall class pass percentage
 
-* Grade distribution chart
-* Subject performance chart
-* Pass/fail chart
+#### Charts and Reports
 
-#### Export
+- Grade distribution chart
+- Subject performance chart
+- Pass/fail chart
+- CSV export
+- Individual PDF result reports
 
-* Export student results as CSV
-* Export student result as PDF
+#### Database
 
-#### UI Improvements
+Initially, the application handled results without permanent storage. SQLite was later added to save student details, subjects and marks.
 
-* Responsive design
-* Mobile-friendly layout
-* Result summary cards
-* Improved tables
-* Better spacing
-* Clear PASS/FAIL indicators
-* Improved error messages
-* User-friendly empty states
+This allows previously saved records to remain available after restarting the application.
 
-#### Data Persistence
+#### Interface Improvements
 
-* SQLite database
-* Save student information
-* Save subject information
-* Save marks
-* Retrieve saved students after restarting the application
+- Responsive layout
+- Result summary cards
+- Improved tables and navigation
+- Clear pass/fail indicators
+- Better form validation and error messages
+- Empty-state messages when no records are available
 
-### Version 2A — Basic Authentication and Role Management
+---
 
-#### Three User Roles & Access Control
-* **Admin**:
-  * Full administrative access to student records (Add, Edit, Delete).
-  * Create Teacher accounts and assign specific courses/classes (e.g., `MCA AI`, `BCA`, or `ALL`).
-  * Class Analytics, Grade Distribution, and System Overview.
-  * Class CSV spreadsheet export.
-* **Teacher**:
-  * Scoped dashboard displaying only students assigned to their designated course/class.
-  * Enter and update subject marks for assigned students with automatic recalculation.
-  * View detailed student result scorecards and download student PDF reports.
-* **Student**:
-  * Self-registration portal with auto-provisioned student account.
-  * Dedicated student dashboard, personal result card, and interactive performance charts.
-  * Download personal official PDF report card and personal CSV scorecard.
-  * Strict security isolation: Cannot view other students' records, modify marks, or access Admin/Teacher routes.
+### Version 2A — Authentication and Role Management
 
-#### Security & Authentication
-* Password hashing using Werkzeug (`generate_password_hash` and `check_password_hash`).
-* Session-based login management with role decorators (`@login_required`, `@admin_required`, `@teacher_required`).
-* Initial Admin Setup Wizard (`/setup-admin`) for initial configuration.
-* Flash alert system for user notifications and permission denials.
+In this version, I added a login system with three different user roles: Admin, Teacher and Student.
+
+Each role has its own dashboard and access permissions.
+
+#### Admin
+
+- View and manage student records
+- Add, edit and delete students
+- Create teacher accounts
+- Assign teachers to courses/classes
+- View class analytics
+- Manage student results
+- Export student data as CSV
+
+#### Teacher
+
+- Access a separate teacher dashboard
+- View students from assigned courses/classes
+- Enter and update marks
+- View student results
+- Download student PDF reports
+
+#### Student
+
+- Register and log in
+- Access a personal dashboard
+- View subject-wise marks and grades
+- Check percentage and pass/fail status
+- View performance charts
+- Download personal PDF and CSV reports
+
+Students can only view their own results and cannot edit marks or access other student records.
+
+#### Authentication and Security
+
+- Password hashing using Werkzeug
+- Flask session-based login
+- Role-based access control
+- Protected routes
+- Logout functionality
+- Initial Admin setup
+- Error and notification messages
+
+---
+
+### Version 2B — Academic Management System
+
+Version 2B focuses on organizing the academic side of the application.
+
+Previously, the system mainly worked with student records and their results. This update connects students with courses, semesters, subjects and teachers.
+
+#### Course Management
+
+- Add new courses such as MCA, BCA and B.Tech
+- Edit and delete courses
+- Assign students to courses
+- View students belonging to a particular course
+
+#### Semester Management
+
+- Manage semesters for different courses
+- Assign students to semesters
+- View semester-wise student records
+- Display current semester details
+
+#### Subject Management
+
+- Add subjects with names and subject codes
+- Assign subjects to courses and semesters
+- Edit and remove subjects
+- Prevent duplicate subject assignments
+- View subjects for a selected course and semester
+
+#### Teacher Assignment
+
+- Assign teachers to subjects
+- Display assigned subjects on the teacher dashboard
+- View students enrolled in assigned subjects
+- Allow teachers to manage marks for authorized subjects
+
+#### Student Academic Profile
+
+Student profiles now include:
+
+- Name and roll number
+- Course
+- Semester
+- Academic year
+- Enrolled subjects
+
+#### Dashboard Updates
+
+**Admin Dashboard**
+- Manage courses, semesters and subjects
+- Assign teachers
+- Manage student academic details
+- View course-wise and semester-wise students
+
+**Teacher Dashboard**
+- View assigned subjects
+- View students enrolled in those subjects
+- Enter and update marks
+
+**Student Dashboard**
+- View course and semester
+- View enrolled subjects
+- Access academic details
+- View results and performance reports
+
+Academic information is stored in the existing SQLite database.
+
+---
 
 ## Grading System
 
-| Marks/Percentage | Grade |
-| ---------------- | ----- |
-| 90–100           | A     |
-| 80–89            | B     |
-| 70–79            | C     |
-| 60–69            | D     |
-| Below 60         | F     |
+The application currently uses the following grading system:
 
-## Pass/Fail System
+| Marks / Percentage | Grade |
+|---|---|
+| 90–100 | A |
+| 80–89 | B |
+| 70–79 | C |
+| 60–69 | D |
+| Below 60 | F |
 
-* Marks ≥ 40 → PASS
-* Marks < 40 → FAIL
-* All subjects must pass for the overall result to be PASS
+### Pass/Fail Rules
 
-## Subject-wise Remarks
+- 40 or above: PASS
+- Below 40: FAIL
+- All subjects must be passed for the overall result to be PASS
 
-| Marks    | Remark            |
-| -------- | ----------------- |
-| 90–100   | Excellent         |
-| 80–89    | Very Good         |
-| 70–79    | Good              |
-| 60–69    | Satisfactory      |
-| 40–59    | Needs Improvement |
-| Below 40 | Fail              |
+Grades and pass/fail status are calculated separately.
 
-## Performance Categories
+### Performance Categories
 
-| Percentage | Category          |
-| ---------- | ----------------- |
-| 90–100     | Excellent         |
-| 80–89      | Very Good         |
-| 70–79      | Good              |
-| 60–69      | Average           |
-| Below 60   | Needs Improvement |
+| Percentage | Category |
+|---|---|
+| 90–100 | Excellent |
+| 80–89 | Very Good |
+| 70–79 | Good |
+| 60–69 | Average |
+| Below 60 | Needs Improvement |
+
+---
 
 ## Tech Stack
 
-* Python
-* Flask
-* HTML
-* CSS
-* JavaScript
-* SQLite
-* Git
-* GitHub
+| Technology | Used For |
+|---|---|
+| Python | Backend logic and calculations |
+| Flask | Web application |
+| HTML | Page structure |
+| CSS | Styling and responsive design |
+| JavaScript | Dynamic forms and interactions |
+| SQLite | Storing student and academic data |
+| Werkzeug | Password hashing |
+| Chart.js | Charts and visualizations |
+| ReportLab | PDF reports |
+| Git & GitHub | Version control |
 
 ## Project Structure
+
+Main files and templates used in the project:
 
 ```text
 student-grade-calculator/
 │
-├── app.py                      # Flask backend, auth logic, role routing, database operations
-├── test_v2a.py                 # Automated integration and security test suite
-├── README.md                   # Complete documentation
-├── student_results.db          # SQLite database (students, subjects, users)
+├── app.py
+├── README.md
+├── test_v2a.py
+├── .gitignore
+├── student_results.db
 │
 ├── static/
-│   └── style.css               # Clean, responsive CSS styling and role badges
+│   └── style.css
 │
 └── templates/
-    ├── base.html               # Base layout with role-aware navigation and flash alerts
-    ├── login.html              # Unified login page for Admin, Teacher, and Student
-    ├── register.html           # Student self-registration form
-    ├── setup_admin.html        # Initial Admin setup wizard
-    ├── admin_dashboard.html    # Admin management overview & statistics
-    ├── admin_teachers.html     # Teacher account creation & course assignment
-    ├── admin_student_add.html  # Admin student entry form
-    ├── admin_student_edit.html # Admin student edit form
-    ├── teacher_dashboard.html  # Teacher scoped dashboard for assigned classes
-    ├── teacher_update_marks.html # Teacher marks update and recalculation
-    ├── student_dashboard.html  # Student personal dashboard
-    ├── student_my_result.html  # Student detailed result scorecard
-    ├── student_my_performance.html # Student visual performance analytics
-    ├── students.html           # Admin directory of all students with search & filters
-    ├── student_detail.html     # Detailed student scorecard view
-    ├── analytics.html          # Class-wide analytics with Chart.js charts
-    └── index.html              # Grade calculator landing page
+    ├── base.html
+    ├── index.html
+    ├── login.html
+    ├── register.html
+    ├── setup_admin.html
+    ├── admin_dashboard.html
+    ├── admin_teachers.html
+    ├── teacher_dashboard.html
+    ├── teacher_update_marks.html
+    ├── student_dashboard.html
+    ├── student_my_result.html
+    ├── student_my_performance.html
+    ├── student_add.html
+    ├── student_edit.html
+    ├── student_detail.html
+    ├── students.html
+    └── analytics.html
 ```
 
-## Default Accounts & Testing Credentials
-
-| Role | Username / Identifier | Password | Access Scope |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin` | `admin123` | Full system access, teacher creation, student CRUD, analytics, CSV export |
-| **Teacher** | Created by Admin | Set by Admin | Students in assigned course (e.g. `MCA AI`), mark editing, PDF download |
-| **Student** | Roll Number (e.g. `101`) or custom username | `student123` or registered password | Personal scorecard, performance charts, personal PDF and CSV downloads |
+Additional academic management templates may be included in Version 2B.
 
 ## How to Run
 
-1. Clone or open the repository.
-2. Open the project folder in the terminal.
-3. Install required dependencies:
-   ```bash
-   pip install flask reportlab
-   ```
-4. Run the Flask application:
-   ```bash
-   python app.py
-   ```
-5. Open `http://127.0.0.1:5000/` in your browser.
-6. To run the automated test suite:
-   ```bash
-   python test_v2a.py
-   ```
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/ananyagene/Student-Grade-Calculator.git
+```
+
+### 2. Open the Project Folder
+
+```bash
+cd Student-Grade-Calculator
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install flask reportlab
+```
+
+### 4. Run the Application
+
+```bash
+python app.py
+```
+
+### 5. Open in Browser
+
+Open:
+
+`http://127.0.0.1:5000/`
+
+For a new installation, complete the initial Admin setup before using the role-based dashboards.
+
+### Run Tests
+
+```bash
+python test_v2a.py
+```
 
 ## Development Progress
 
-* [x] Version 1A — Basic Grade Calculator
-* [x] Version 1B — Add/Remove Subjects
-* [x] Version 1C — Individual Subject Grades
-* [x] Version 1D — Pass/Fail Status
-* [x] Version 1E — Subject-wise Remarks
-* [x] Version 1F — Student Result Management System
-* [x] Version 2A — Basic Authentication and Role Management (Admin, Teacher, Student)
+- [x] Version 1A — Basic Grade Calculator
+- [x] Version 1B — Dynamic Subjects
+- [x] Version 1C — Individual Subject Grades
+- [x] Version 1D — Pass/Fail Status
+- [x] Version 1E — Subject-wise Remarks
+- [x] Version 1F — Student Result Management System
+- [x] Version 2A — Authentication and Role Management
+- [x] Version 2B — Academic Management System
+- [ ] Version 3 — Examination Management System
 
-## Future Improvements
+## What's Next?
 
-Possible future improvements may include:
+### Version 3 — Examination Management System
 
-* Cloud database deployment (PostgreSQL / MySQL)
-* Multi-semester GPA / CGPA transcript calculation
-* Automated email notifications / result publishing
-* Attendance tracking integration
-* AI-based performance insights and study tips
+The next version will focus on handling examinations and semester results.
 
-## Purpose
+Planned features:
 
-This project is being developed as a practical learning project to strengthen skills in:
+- Internal and external examination marks
+- Assignment and practical marks
+- Subject credits
+- Semester-wise result calculation
+- SGPA and CGPA calculation
+- Backlog and reappear management
+- Result publishing and locking
 
-* Python
-* Flask
-* Backend development
-* Frontend development
-* JavaScript
-* SQL and databases
-* Data analysis
-* Git and GitHub
-* Application development
+### Other Features I May Add Later
 
-The project is intentionally developed step-by-step so that each version introduces new concepts while keeping the application practical and understandable.
+- Advanced performance analytics
+- AI-based study suggestions
+- Student performance trends
+- Email notifications
+- REST APIs
+- Cloud database
+- Online deployment
+
+## What I'm Learning From This Project
+
+I'm using this project to get hands-on experience with:
+
+- Python and Flask
+- Frontend and backend development
+- HTML, CSS and JavaScript
+- SQL and databases
+- Authentication and user roles
+- CRUD operations
+- Data analysis and visualization
+- Git and GitHub
+- Building and improving a full-stack application
+
+## About the Project
+
+This is an ongoing learning project.
+
+My main aim is to understand how a web application is developed, starting from basic calculations and gradually adding features like database storage, authentication, academic management and analytics.
+
+Instead of building everything at once, I'm working on it version by version so that I can understand the code and improve the application as I learn.
+
+---
+
+**Current Version:** 2B — Academic Management System
+
+**Next Version:** 3 — Examination Management System
+
+**Status:** In Development
